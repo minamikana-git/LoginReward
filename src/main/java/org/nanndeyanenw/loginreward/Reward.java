@@ -41,7 +41,7 @@ public class Reward {
 
         switch (days) {
             case 1:
-                return new Reward(50, "連続ログインボーナス！: 50NANDE!");
+                return new Reward(50, "ログインボーナス！: 50NANDE!");
             case 2:
                 return new Reward(100, "2 連続ログインボーナス！: 100NANDE!");
             case 3:
