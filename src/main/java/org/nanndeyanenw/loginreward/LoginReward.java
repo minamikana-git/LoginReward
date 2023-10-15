@@ -2,11 +2,17 @@ package org.nanndeyanenw.loginreward;
 
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class LoginReward extends JavaPlugin {
@@ -31,6 +37,7 @@ public class LoginReward extends JavaPlugin {
         this.rewardManager = new RewardManager(this);
         rewardManager.loadData();
     }
+
     @Override
     public void onDisable() {
         rewardManager.saveData();
@@ -49,6 +56,7 @@ public class LoginReward extends JavaPlugin {
         }
         return true;
     }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("loginreward")) {
@@ -66,8 +74,37 @@ public class LoginReward extends JavaPlugin {
 
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(null,9,"ログインボーナス");
+        Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
 
         player.openInventory(inventory);
+    }
+
+    private void openLoginRewardInventory(Player player) {
+        Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
+        int day = rewardManager.getConsecutiveDays(player); // 連続ログイン日数を取得
+
+        for (int i = 1; i <= 7; i++) {
+            if (i < day) { // すでに受け取った報酬の場合
+                continue; // スキップ
+            }
+            Reward reward = rewardManager.getRewardForDay(i);
+            if (reward != null) {
+                ItemStack stack = createItemStack(Material.GOLD_NUGGET, "§a" + reward.getMessage(), "§e" + reward.getAmount() + "NANDE!");
+                inventory.addItem(stack);
+            }
+        }
+
+        player.openInventory(inventory);
+    }
+
+    private ItemStack createItemStack(Material material, String displayName, String lore) {
+        ItemStack stack = new ItemStack(material);
+        ItemMeta meta = stack.getItemMeta();
+        meta.setDisplayName(displayName);
+        List<String> lores = new ArrayList<>();
+        lores.add(lore);
+        meta.setLore(lores);
+        stack.setItemMeta(meta);
+        return stack;
     }
 }

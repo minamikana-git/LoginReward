@@ -4,12 +4,12 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class RewardManager {
+public class RewardGUI {
 
-    private final LoginRewardPlugin plugin;
+    private final LoginReward plugin;
     private final DataUtil dataUtil;
 
-    public RewardManager(LoginRewardPlugin plugin) {
+    public RewardManager(LoginReward plugin) {
         this.plugin = plugin;
         this.dataUtil = new DataUtil(plugin);
     }

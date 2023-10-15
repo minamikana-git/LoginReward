@@ -1,7 +1,5 @@
 package org.nanndeyanenw.loginreward;
 
-
-
 public class Reward {
 
     private final int amount;

@@ -57,4 +57,11 @@ public class RewardManager {
             default -> null;
         };
     }
+
+    public int getConsecutiveDays(Player player) {
+        if (dataUtil.contains(player.getUniqueId().toString() + ".consecutiveDays")) {
+            return (int) dataUtil.get(player.getUniqueId().toString() + ".consecutiveDays");
+        }
+        return 0;
+    }
 }
