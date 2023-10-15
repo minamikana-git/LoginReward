@@ -11,10 +11,10 @@ public class LoginReward extends JavaPlugin {
     private RewardManager rewardManager;
 
     private Economy economy;
-    private File dataFile;
 
     @Override
     public void onEnable() {
+        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         if (!setupEconomy()) { // Vaultセットアップが失敗した場合
             getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
             if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -25,14 +25,9 @@ public class LoginReward extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
         this.rewardManager = new RewardManager(this);
-        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-
-
         rewardManager.loadData();
     }
-
     @Override
     public void onDisable() {
         rewardManager.saveData();

@@ -24,7 +24,6 @@ public class RewardManager {
         this.dataFile = new File(plugin.getDataFolder(), "loginRewards.yml");
         loadData();
     }
-
     public void loadData() {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
         for (String uuidString : config.getKeys(false)) {
@@ -49,8 +48,6 @@ public class RewardManager {
             e.printStackTrace();
         }
     }
-
-
     public void updateLoginDate(Player player) {
         UUID playerUUID = player.getUniqueId();
         LocalDate today = LocalDate.now();
@@ -66,7 +63,6 @@ public class RewardManager {
         } else {
             consecutiveLogins.put(playerUUID, 1);
         }
-
         lastLoginDates.put(playerUUID, today);
     }
 
