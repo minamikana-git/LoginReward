@@ -75,12 +75,6 @@ public class LoginReward extends JavaPlugin {
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
         Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
-
-        player.openInventory(inventory);
-    }
-
-    private void openLoginRewardInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
         int day = rewardManager.getConsecutiveDays(player); // 連続ログイン日数を取得
 
         for (int i = 1; i <= 7; i++) {
