@@ -1,7 +1,7 @@
 package org.nanndeyanenw.loginreward;
 
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +12,12 @@ import java.util.UUID;
 
 public class RewardManager {
     private final LoginReward plugin;
-    private final Map<UUID, Integer> consecutiveLogins = new HashMap<>(); // UUIDを使用してプレイヤーを識別
+
     private final File dataFile;
+
+    private final Map<UUID, Integer> consecutiveLogins = new HashMap<>(); // Playerの代わりにUUIDを使用
+    private final Map<UUID, LocalDate> lastLoginDates = new HashMap<>(); // Playerの代わりにUUIDを使用
+
 
     public RewardManager(LoginReward plugin) {
         this.plugin = plugin;
@@ -22,42 +26,52 @@ public class RewardManager {
     }
 
     public void loadData() {
-        if (!dataFile.exists()) return;
-
-        FileConfiguration dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-
-        for (String uuidString : dataConfig.getKeys(false)) {
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(dataFile);
+        for (String uuidString : config.getKeys(false)) {
             UUID uuid = UUID.fromString(uuidString);
-            int days = dataConfig.getInt(uuidString + ".days");
-            LocalDate lastLogin = LocalDate.parse(dataConfig.getString(uuidString + ".lastLoginDate"));
-
-            if (lastLogin.isBefore(LocalDate.now().minusDays(1))) {
-                days = 1;  // 日数をリセット
-            }
+            int days = config.getInt(uuidString + ".days");
+            String lastLoginStr = config.getString(uuidString + ".lastLogin");
+            LocalDate lastLogin = LocalDate.parse(lastLoginStr);
             consecutiveLogins.put(uuid, days);
+            lastLoginDates.put(uuid, lastLogin);
         }
     }
 
     public void saveData() {
-        FileConfiguration dataConfig = new YamlConfiguration();
-
-        for (Map.Entry<UUID, Integer> entry : consecutiveLogins.entrySet()) {
-            dataConfig.set(entry.getKey().toString() + ".days", entry.getValue());
-            dataConfig.set(entry.getKey().toString() + ".lastLoginDate", LocalDate.now().toString());
+        YamlConfiguration config = new YamlConfiguration();
+        for (UUID uuid : consecutiveLogins.keySet()) {
+            config.set(uuid.toString() + ".days", consecutiveLogins.get(uuid));
+            config.set(uuid.toString() + ".lastLogin", lastLoginDates.get(uuid).toString());
         }
-
         try {
-            dataConfig.save(dataFile);
+            config.save(dataFile); // dataFile に保存
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // ... 他のメソッド ...
+
+    public void updateLoginDate(Player player) {
+        UUID playerUUID = player.getUniqueId();
+        LocalDate today = LocalDate.now();
+
+        if (lastLoginDates.containsKey(playerUUID)) {
+            LocalDate lastLoginDate = lastLoginDates.get(playerUUID);
+
+            if (today.isAfter(lastLoginDate.plusDays(1))) {
+                consecutiveLogins.put(playerUUID, 1);
+            } else {
+                consecutiveLogins.put(playerUUID, consecutiveLogins.getOrDefault(playerUUID, 0) + 1);
+            }
+        } else {
+            consecutiveLogins.put(playerUUID, 1);
+        }
+
+        lastLoginDates.put(playerUUID, today);
+    }
+
 }
 
-
-    // その他の関連メソッドをここに追加することができます。
 
 
 

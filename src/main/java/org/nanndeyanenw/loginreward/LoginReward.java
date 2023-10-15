@@ -1,7 +1,6 @@
 package org.nanndeyanenw.loginreward;
 
-import org.nanndeyanenw.loginreward.RewardGUI;
-import org.nanndeyanenw.loginreward.RewardManager;
+
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -9,14 +8,14 @@ import java.io.File;
 
 public class LoginReward extends JavaPlugin {
 
-       private RewardManager rewardManager;
+    private RewardManager rewardManager;
 
     private Economy economy;
     private File dataFile;
 
     @Override
     public void onEnable() {
-            if (!setupEconomy()) { // 起動時のVault関係があるかどうか
+       if (!setupEconomy()) { // 起動時のVault関係があるかどうか
                 getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
 
                 if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -29,7 +28,7 @@ public class LoginReward extends JavaPlugin {
          }
         this.rewardManager = new RewardManager(this);
         getCommand("loginreward").setExecutor(RewardCommandExecutor(this));
-
+        rewardManager.loadData();
     }
 
     @Override
