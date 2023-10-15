@@ -1,8 +1,11 @@
 package org.nanndeyanenw.loginreward;
 
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -12,8 +15,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Collections;
 
+import static org.bukkit.Bukkit.getServer;
+
 public class RewardGUI implements Listener {
 
+    private Economy economy;
     private final String title = "ログイン報酬";
     private final int size = 9 * 3; // 3 rows, modify as needed
 
@@ -64,13 +70,41 @@ public class RewardGUI implements Listener {
 
             Reward reward = determineRewardForDays(consecutiveDays);
             if (reward != null) {
-                // プレイヤーに報酬を付与する処理を実装
+                // プレイヤーに報酬を付与
+                if (reward.getMoney() > 0) {
+                    if (setupEconomy(player)) { // setupEconomy メソッドに player を渡す
+                        Economy economy = getEconomy(); // 新たに変数を宣言する必要はありません
+                        if (economy != null) {
+                            EconomyResponse response = economy.depositPlayer(player, reward.getMoney());
+                            if (response.transactionSuccess()) {
+                                player.sendMessage("報酬: " + reward.getMoney() + "を受け取りました！");
+                            }
+                        }
+                    }
+                }
             }
-
             player.closeInventory();
         }
     }
 
+
+
+    private boolean setupEconomy(Player player) {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            player.sendMessage("Vaultプラグインが見つかりません。");
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            player.sendMessage("Economyサービスプロバイダが見つかりません。");
+            return false;
+        }
+        economy = rsp.getProvider(); // Economyプロバイダを設定
+        return economy != null;
+    }
+        private Economy getEconomy() {
+        return economy;
+    }
     public static Reward determineRewardForDays(int days) {
         return switch (days) {
             case 1 -> new Reward(50, "ログインボーナス！: 50NANDE!");
