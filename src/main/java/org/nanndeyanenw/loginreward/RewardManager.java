@@ -1,30 +1,60 @@
 package org.nanndeyanenw.loginreward;
 
-import org.bukkit.configuration.file.YamlConfiguration;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class RewardManager {
+
     private final LoginReward plugin;
+    private final DataUtil dataUtil;
 
     public RewardManager(LoginReward plugin) {
         this.plugin = plugin;
+        this.dataUtil = new DataUtil(plugin);
     }
 
-    // プレイヤーが報酬を受け取るかどうかをチェックするメソッド
     public boolean hasClaimedReward(Player player) {
-        // 実際の確認ロジックをここに書く (例: データベースやconfigファイルからチェック)
-        return false; // 仮の値
+        return dataUtil.contains(player.getUniqueId().toString() + ".claimed");
     }
 
-    // プレイヤーに報酬を与えるメソッド
-    public void giveReward(Player player) {
-        // 実際の報酬のロジックをここに書く (例: VaultAPIを使用してお金を付与)
+    public void claimReward(Player player) {
+        int consecutiveDays = 1; // デフォルトは1日
+        if(dataUtil.contains(player.getUniqueId().toString() + ".consecutiveDays")) {
+            consecutiveDays = (int) dataUtil.get(player.getUniqueId().toString() + ".consecutiveDays");
+        }
+
+        Reward reward = getRewardForDay(consecutiveDays);
+        if (reward == null) return;
+
+        // 報酬を与える
+        Economy econ = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
+        econ.depositPlayer(player, reward.getAmount());
+        player.sendMessage(reward.getMessage());
+
+        // データを更新
+        dataUtil.set(player.getUniqueId().toString() + ".claimed", true);
+        dataUtil.set(player.getUniqueId().toString() + ".consecutiveDays", consecutiveDays + 1);
+    }
+
+    public void resetClaim(Player player) {
+        dataUtil.set(player.getUniqueId().toString() + ".claimed", false);
+    }
+
+    public void resetConsecutiveDays(Player player) {
+        dataUtil.set(player.getUniqueId().toString() + ".consecutiveDays", 1);
+    }
+
+    private Reward getRewardForDay(int day) {
+        return switch (day) {
+            case 1 -> new Reward(50, "ログインボーナス！: 50NANDE!");
+            case 2 -> new Reward(100, "2連続ログインボーナス！: 100NANDE!");
+            case 3 -> new Reward(200, "3連続ログインボーナス！: 200NANDE!");
+            case 4 -> new Reward(400, "4連続ログインボーナス！: 400NANDE!");
+            case 5 -> new Reward(600, "5連続ログインボーナス！: 600NANDE!");
+            case 6 -> new Reward(800, "6連続ログインボーナス！: 800NANDE!");
+            case 7 -> new Reward(1000, "7連続ログインボーナス！: 1000NANDE!");
+            default -> null;
+        };
     }
 }
