@@ -15,19 +15,21 @@ public class LoginReward extends JavaPlugin {
 
     @Override
     public void onEnable() {
-       if (!setupEconomy()) { // 起動時のVault関係があるかどうか
-                getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
+        if (!setupEconomy()) { // Vaultセットアップが失敗した場合
+            getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
+            if (getServer().getPluginManager().getPlugin("Vault") == null) {
+                getLogger().severe("エラー：Vaultプラグインが見つかりません。");
+            } else {
+                getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
+            }
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-                if (getServer().getPluginManager().getPlugin("Vault") == null) {
-                    getLogger().severe("エラー：Vaultプラグインが見つかりません。");
-                } else {
-                    getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
-                }
-                getServer().getPluginManager().disablePlugin(this);
-                return;
-         }
         this.rewardManager = new RewardManager(this);
-        getCommand("loginreward").setExecutor(RewardCommandExecutor(this));
+        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
+
+
         rewardManager.loadData();
     }
 
@@ -37,15 +39,14 @@ public class LoginReward extends JavaPlugin {
     }
 
     private boolean setupEconomy() {
-        if (!setupEconomy()) { // 起動時のVault関係があるかどうか
-            getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().severe("エラー：Vaultプラグインが見つかりません。");
+            return false;
+        }
 
-            if (getServer().getPluginManager().getPlugin("Vault") == null) {
-                getLogger().severe("エラー：Vaultプラグインが見つかりません。");
-            } else {
-                getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
-            }
-            getServer().getPluginManager().disablePlugin(this);
+        economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
+        if (economy == null) {
+            getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
             return false;
         }
         return true;
