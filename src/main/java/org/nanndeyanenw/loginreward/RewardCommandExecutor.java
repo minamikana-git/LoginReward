@@ -1,9 +1,12 @@
 package org.nanndeyanenw.loginreward;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
 public class RewardCommandExecutor implements CommandExecutor {
 
     private final LoginReward loginReward;
@@ -11,7 +14,6 @@ public class RewardCommandExecutor implements CommandExecutor {
     public RewardCommandExecutor(LoginReward loginReward) {
         this.loginReward = loginReward;
     }
-
 
 
     @Override
@@ -23,10 +25,17 @@ public class RewardCommandExecutor implements CommandExecutor {
             }
             // プレイヤーとしての処理を続ける
             Player player = (Player) commandSender;
-            // ここでプレイヤーに対する処理を実行
-            return true; // または必要に応じて適切な戻り値を設定
+            openLoginRewardInventory(player);
+            return true;
         }
         return true;
     }
+    //ログインボーナスのインベントリを開くメソッド
+    private void openLoginRewardInventory(Player player) {
+        Inventory inventory = Bukkit.createInventory(null,9,"ログインボーナス");
+
+        player.openInventory(inventory);
+    }
+
 }
 
