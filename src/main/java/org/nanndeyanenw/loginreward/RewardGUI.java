@@ -46,8 +46,7 @@ public class RewardGUI implements Listener {
         if (slot >= 0 && slot < 7) {
             player.sendMessage("ログイン報酬をゲットしました。" + (slot + 1));
 
-            // Here you'd actually give the reward. For example:
-            // player.getInventory().addItem(new ItemStack(Material.DIAMOND, slot + 1));
+
 
             player.closeInventory();
         }

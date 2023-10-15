@@ -12,6 +12,8 @@ public class RewardCommandExecutor implements CommandExecutor {
         this.loginReward = loginReward;
     }
 
+
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("loginreward")) {

@@ -2,6 +2,11 @@ package org.nanndeyanenw.loginreward;
 
 
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -44,5 +49,26 @@ public class LoginReward extends JavaPlugin {
             return false;
         }
         return true;
+    }
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
+        if (command.getName().equalsIgnoreCase("loginreward")) {
+            if (!(commandSender instanceof Player)) {
+                commandSender.sendMessage("§cこのコマンドはプレイヤーからのみ実行できます。");
+                return true;
+            }
+            // プレイヤーとしての処理を続ける
+            Player player = (Player) commandSender;
+            openLoginRewardInventory(player);
+            return true; // または必要に応じて適切な戻り値を設定
+        }
+        return true;
+    }
+
+    //ログインボーナスのインベントリを開くメソッド
+    private void openLoginRewardInventory(Player player) {
+        Inventory inventory = Bukkit.createInventory(null,9,"ログインボーナス");
+
+        player.openInventory(inventory);
     }
 }
