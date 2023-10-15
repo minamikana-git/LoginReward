@@ -1,52 +1,59 @@
 package org.nanndeyanenw.loginreward;
 
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
-
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class RewardManager {
     private final LoginReward plugin;
-    private final Map<Player, Integer> consecutiveLogins = new HashMap<>();
+    private final Map<UUID, Integer> consecutiveLogins = new HashMap<>(); // UUIDを使用してプレイヤーを識別
+    private final File dataFile;
 
     public RewardManager(LoginReward plugin) {
         this.plugin = plugin;
+        this.dataFile = new File(plugin.getDataFolder(), "loginRewards.yml");
         loadData();
     }
 
     public void loadData() {
-        
+        if (!dataFile.exists()) return;
 
-    public Reward getReward(Player player) {
-        int days = consecutiveLogins.getOrDefault(player, 0);
-        return determineRewardForDays(days);
+        FileConfiguration dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+
+        for (String uuidString : dataConfig.getKeys(false)) {
+            UUID uuid = UUID.fromString(uuidString);
+            int days = dataConfig.getInt(uuidString + ".days");
+            LocalDate lastLogin = LocalDate.parse(dataConfig.getString(uuidString + ".lastLoginDate"));
+
+            if (lastLogin.isBefore(LocalDate.now().minusDays(1))) {
+                days = 1;  // 日数をリセット
+            }
+            consecutiveLogins.put(uuid, days);
+        }
     }
 
-    private Reward determineRewardForDays(int days) {
-        // 連続ログイン日数に基づいて報酬を決定します。
-        // この例では単純に日数に基づいて異なるアイテムを提供します。
-        // 実際にはもっと複雑な報酬システムを実装することができます。
-        if (days == 1) {
-            return new Reward(new ItemStack(Material.DIAMOND, 1), "1 day login reward!");
-        } else if (days == 2) {
-            return new Reward(new ItemStack(Material.EMERALD, 2), "2 days login reward!");
-        } else if (days == 3) {
-            return new Reward(new ItemStack(Material.GOLD_INGOT, 3), "3 days login reward!");
-        } else if (days == 4) {
-            return new Reward(new ItemStack(Material.IRON_INGOT, days), days + "4 days login reward!");
-        } else if (days == 5) {
-            return new Reward(new ItemStack(Material.IRON_INGOT, days), days + "5 days login reward!");
-        } else if (days == 6) {
-            return new Reward(new ItemStack(Material.IRON_INGOT, days), days + "6 days login reward!");
-        } else if (days == 7) {
-            return new Reward(new ItemStack(Material.IRON_INGOT, days), days + "7 days login reward!");
+    public void saveData() {
+        FileConfiguration dataConfig = new YamlConfiguration();
+
+        for (Map.Entry<UUID, Integer> entry : consecutiveLogins.entrySet()) {
+            dataConfig.set(entry.getKey().toString() + ".days", entry.getValue());
+            dataConfig.set(entry.getKey().toString() + ".lastLoginDate", LocalDate.now().toString());
         }
 
-        return null;
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
+    // ... 他のメソッド ...
 }
 
 
