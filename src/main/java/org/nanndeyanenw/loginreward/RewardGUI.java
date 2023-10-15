@@ -51,36 +51,31 @@ public class RewardGUI implements Listener {
 
             gui.setItem(i - 1, rewardItem);
         }
-
         player.openInventory(gui);
     }
-
     @EventHandler
     public void handleClick(InventoryClickEvent event) {
         if (event.getClickedInventory() == null || !event.getView().getTitle().equals(title)) {
             return;
         }
-
         event.setCancelled(true);
-
         int slot = event.getSlot();
         Player player = (Player) event.getWhoClicked();
-
         if (slot >= 0 && slot < 7) {
             int consecutiveDays = slot + 1;
             player.sendMessage("ログイン報酬をゲットしました。" + consecutiveDays);
-
             // ここで報酬をプレイヤーに付与
             Reward reward = determineRewardForDays(consecutiveDays);
             if (reward != null && reward.getMoney() > 0) {
-                economy.depositPlayer(player, reward.getMoney());
-                player.sendMessage("報酬を受け取りました！: " + reward.getMoney() + "NANDE!");
+                double moneyAmount = reward.getMoney();
+                economy.depositPlayer(player, moneyAmount); // Vaultを使用してお金をプレイヤーに追加
+
+                player.sendMessage("報酬を受け取りました！: " + moneyAmount + "NANDE!");
             }
 
             player.closeInventory();
         }
     }
-
     private boolean setupEconomy(Player player) {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             player.sendMessage("Vaultプラグインが見つかりません。");
