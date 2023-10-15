@@ -60,7 +60,7 @@ public class LoginReward extends JavaPlugin {
             // プレイヤーとしての処理を続ける
             Player player = (Player) commandSender;
             openLoginRewardInventory(player);
-            return true; // または必要に応じて適切な戻り値を設定
+            return true;
         }
         return true;
     }
