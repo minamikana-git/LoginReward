@@ -38,6 +38,7 @@ public class Reward {
     }
 
     public static Reward determineRewardForDays(int days) {
+
         switch (days) {
             case 1:
                 return new Reward(50, "連続ログインボーナス！: 50NANDE!");

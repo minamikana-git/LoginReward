@@ -4,7 +4,6 @@ package org.nanndeyanenw.loginreward;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 
 public class LoginReward extends JavaPlugin {
 
