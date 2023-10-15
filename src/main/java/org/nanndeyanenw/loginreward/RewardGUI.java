@@ -2,16 +2,16 @@ package org.nanndeyanenw.loginreward;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.Collections;
 
@@ -24,12 +24,12 @@ public class RewardGUI implements Listener {
     private final int size = 9 * 3; // 3 rows, modify as needed
 
     public void openGUI(Player player, int consecutiveDays) {
-        Inventory gui = Bukkit.createInventory(null, 9*3, "ログインボーナス");
+        Inventory gui = Bukkit.createInventory(null, size, title);
 
-        // For demonstration, let's add a reward for each day
         for (int i = 1; i <= 7; i++) {
             ItemStack rewardItem;
             rewardItem = null;
+
             if (i <= consecutiveDays) {
                 Reward reward = determineRewardForDays(i);
                 if (reward != null) {
@@ -46,7 +46,7 @@ public class RewardGUI implements Listener {
                 rewardItem.setItemMeta(meta);
             }
 
-            gui.setItem(i - 1, rewardItem); // Placing in slots 0-6
+            gui.setItem(i - 1, rewardItem);
         }
 
         player.openInventory(gui);
@@ -58,11 +58,10 @@ public class RewardGUI implements Listener {
             return;
         }
 
-        event.setCancelled(true); // Prevent taking items from the GUI
+        event.setCancelled(true);
 
         int slot = event.getSlot();
         Player player = (Player) event.getWhoClicked();
-
 
         if (slot >= 0 && slot < 7) {
             int consecutiveDays = slot + 1;
@@ -72,8 +71,8 @@ public class RewardGUI implements Listener {
             if (reward != null) {
                 // プレイヤーに報酬を付与
                 if (reward.getMoney() > 0) {
-                    if (setupEconomy(player)) { // setupEconomy メソッドに player を渡す
-                        Economy economy = getEconomy(); // 新たに変数を宣言する必要はありません
+                    if (setupEconomy(player)) {
+                        Economy economy = getEconomy();
                         if (economy != null) {
                             EconomyResponse response = economy.depositPlayer(player, reward.getMoney());
                             if (response.transactionSuccess()) {
@@ -86,6 +85,7 @@ public class RewardGUI implements Listener {
             player.closeInventory();
         }
     }
+
     private boolean setupEconomy(Player player) {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             player.sendMessage("Vaultプラグインが見つかりません。");
@@ -99,9 +99,11 @@ public class RewardGUI implements Listener {
         economy = rsp.getProvider(); // Economyプロバイダを設定
         return economy != null;
     }
-        private Economy getEconomy() {
+
+    private Economy getEconomy() {
         return economy;
     }
+
     public static Reward determineRewardForDays(int days) {
         return switch (days) {
             case 1 -> new Reward(50, "ログインボーナス！: 50NANDE!");
