@@ -20,6 +20,10 @@ import static org.bukkit.Bukkit.getServer;
 public class RewardGUI implements Listener {
 
     private Economy economy;
+
+    public RewardGUI(Economy economy) {
+        this.economy = economy;
+    }
     private final String title = "ログイン報酬";
     private final int size = 9 * 3; // 3 rows, modify as needed
 
@@ -67,21 +71,13 @@ public class RewardGUI implements Listener {
             int consecutiveDays = slot + 1;
             player.sendMessage("ログイン報酬をゲットしました。" + consecutiveDays);
 
+            // ここで報酬をプレイヤーに付与
             Reward reward = determineRewardForDays(consecutiveDays);
-            if (reward != null) {
-                // プレイヤーに報酬を付与
-                if (reward.getMoney() > 0) {
-                    if (setupEconomy(player)) {
-                        Economy economy = getEconomy();
-                        if (economy != null) {
-                            EconomyResponse response = economy.depositPlayer(player, reward.getMoney());
-                            if (response.transactionSuccess()) {
-                                player.sendMessage("報酬: " + reward.getMoney() + "を受け取りました！");
-                            }
-                        }
-                    }
-                }
+            if (reward != null && reward.getMoney() > 0) {
+                economy.depositPlayer(player, reward.getMoney());
+                player.sendMessage("報酬を受け取りました！: " + reward.getMoney() + "NANDE!");
             }
+
             player.closeInventory();
         }
     }
