@@ -5,6 +5,8 @@ api-version: '1.20'
 load: STARTUP
 depend:
   - "Vault"
+softdepend:
+  - "Vault"
 commands:
  loginreward:
    usage: loginreward

@@ -1,40 +1,30 @@
 package org.nanndeyanenw.loginreward;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
 public class RewardCommandExecutor implements CommandExecutor {
 
-    private final LoginReward loginReward;
+    private final RewardManager rewardManager;
 
-    public RewardCommandExecutor(LoginReward loginReward) {
-        this.loginReward = loginReward;
+    public RewardCommandExecutor(RewardManager rewardManager) {
+        this.rewardManager = rewardManager;
     }
-
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        if (command.getName().equalsIgnoreCase("loginreward")) {
-            if (!(commandSender instanceof Player)) {
-                commandSender.sendMessage("§cこのコマンドはプレイヤーからのみ実行できます。");
-                return true;
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (!rewardManager.hasClaimedReward(player)) {
+                // GUIを表示
+                new RewardGUI(player, rewardManager).open();
+            } else {
+                player.sendMessage("You have already claimed your reward today!");
             }
-            // プレイヤーとしての処理を続ける
-            Player player = (Player) commandSender;
-            openLoginRewardInventory(player);
             return true;
         }
-        return true;
-    }
-    //ログインボーナスのインベントリを開くメソッド
-    private void openLoginRewardInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(null,9,"ログインボーナス");
-
-        player.openInventory(inventory);
+        return false;
     }
 }
-
