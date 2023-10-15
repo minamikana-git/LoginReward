@@ -6,4 +6,5 @@ load: STARTUP
 depend:
   - "Vault"
 commands:
- test:
+ loginreward:
+   usage: loginreward
