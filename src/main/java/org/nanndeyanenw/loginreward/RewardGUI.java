@@ -86,9 +86,6 @@ public class RewardGUI implements Listener {
             player.closeInventory();
         }
     }
-
-
-
     private boolean setupEconomy(Player player) {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             player.sendMessage("Vaultプラグインが見つかりません。");
