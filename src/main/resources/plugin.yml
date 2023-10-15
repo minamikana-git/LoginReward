@@ -1,0 +1,7 @@
+name: LoginReward
+version: '${project.version}'
+main: org.nanndeyanenw.loginreward.LoginReward
+api-version: '1.20'
+load: STARTUP
+depend:
+  - "Vault"
