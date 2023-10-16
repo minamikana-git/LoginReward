@@ -1,6 +1,6 @@
 package org.nanndeyanenw.loginreward;
 
-import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -11,51 +11,36 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.*;
-
-
 public class LoginReward extends JavaPlugin {
 
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
     private RewardManager rewardManager;
 
-    private Economy economy;
 
     @Override
     public void onEnable() {
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-        if (!setupEconomy()) { // Vaultセットアップが失敗した場合
-            getLogger().severe("エラー：Vaultプラグインが見つかりませんでした。プラグインを無効化します。");
-            if (getServer().getPluginManager().getPlugin("Vault") == null) {
-                getLogger().severe("エラー：Vaultプラグインが見つかりません。");
-            } else {
-                getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
-            }
+
+        this.rewardManager = RewardManager.getInstance(this);
+        if (rewardManager == null) {
+            getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        this.rewardManager = new RewardManager(this);
+
         rewardManager.loadData();
     }
 
     @Override
     public void onDisable() {
-        rewardManager.saveData();
-    }
-
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().severe("エラー：Vaultプラグインが見つかりません。");
-            return false;
+        if (rewardManager != null) {
+            rewardManager.saveData();
         }
-
-        economy = getServer().getServicesManager().getRegistration(Economy.class).getProvider();
-        if (economy == null) {
-            getLogger().severe("エラー：Economyサービスプロバイダが見つかりません。");
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -102,4 +87,5 @@ public class LoginReward extends JavaPlugin {
         stack.setItemMeta(meta);
         return stack;
     }
+
 }
