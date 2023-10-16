@@ -81,10 +81,10 @@ public class RewardManager {
 
     private void setupDataConfig() {
         if (dataFile == null) {
-            dataFile = new File(plugin.getDataFolder(), "playerData.yml");
+            dataFile = new File(plugin.getDataFolder(), "playerdata.yml");
         }
         if (!dataFile.exists()) {
-            plugin.saveResource("playerData.yml", false);
+            plugin.saveResource("playerdata.yml", false);
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
