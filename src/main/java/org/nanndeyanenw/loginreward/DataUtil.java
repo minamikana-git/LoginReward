@@ -22,7 +22,7 @@ public class DataUtil {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        file = new File(plugin.getDataFolder(), "playerdata.yml");
+        file = new File(plugin.getDataFolder(), "playerData.yml");
 
         if (!file.exists()) {
             try {
