@@ -61,7 +61,7 @@ public class RewardGUI implements Listener {
         }
 
         econ.depositPlayer(player, rewardAmount);
-        player.sendMessage("You've received " + rewardAmount + " as your login reward!");
+        player.sendMessage("日目の" + rewardAmount + " ログインボーナスを受け取りました。");
     }
 
     public void open(Player player) {
