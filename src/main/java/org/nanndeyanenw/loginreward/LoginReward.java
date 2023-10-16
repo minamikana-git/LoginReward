@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.*;
 public class LoginReward extends JavaPlugin {
 
+    private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
     private RewardManager rewardManager;
@@ -24,25 +25,23 @@ public class LoginReward extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        rewardGUI = new RewardGUI(this);
+        getServer().getPluginManager().registerEvents(rewardGUI,this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-
         this.rewardManager = RewardManager.getInstance(this);
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-
         rewardManager.loadData();
     }
-
     @Override
     public void onDisable() {
         if (rewardManager != null) {
             rewardManager.saveData();
         }
     }
-
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("loginreward")) {
