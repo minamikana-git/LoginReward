@@ -3,11 +3,36 @@ package org.nanndeyanenw.loginreward;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
 
 public class DataUtil {
+    public static int getDaysLoggedIn(Player player) {
+        return dataConfig.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 0);
+    }
+
+    public static void incrementDaysLoggedIn(Player player) {
+        int currentDays = getDaysLoggedIn(player);
+        dataConfig.set(player.getUniqueId().toString()+".daysLoggedIn",currentDays + 1);
+        try {
+            dataConfig.save(dataFile);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void resetDaysLoggedIn(Player player){
+        dataConfig.set(player.getUniqueId().toString() + ".daysLoggedIn", 0);
+        try {
+            dataConfig.save(dataFile);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    private static YamlConfiguration dataConfig;
+    private static File dataFile;
 
     private final LoginReward plugin;
     private File file;
