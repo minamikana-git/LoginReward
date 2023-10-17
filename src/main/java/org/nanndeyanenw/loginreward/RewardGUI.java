@@ -121,7 +121,6 @@ public class RewardGUI implements Listener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
         playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
-
         // daysLoggedInを更新
         daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
