@@ -65,8 +65,7 @@ public class RewardGUI implements Listener {
         }
 
         econ.depositPlayer(player, rewardAmount);
-        LoginReward loginRewardInstance = new LoginReward();
-        int day = loginRewardInstance.rewardManager.getConsecutiveDays(player);
+        int day = plugin.rewardManager.getConsecutiveDays(player);
         player.sendMessage("あなたは" + day + "日目のログインボーナスを受け取りました。" + rewardAmount + "獲得しました。");
 
         // daysLoggedInを更新
@@ -80,13 +79,13 @@ public class RewardGUI implements Listener {
     }
 
     private Inventory createGuiInventory() {
-        Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス"); // 9 slots titled "Welcome Rewards"
+        Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス");
 
-        ItemStack rewardItem = new ItemStack(Material.GOLD_INGOT); // Example reward item
+        ItemStack rewardItem = new ItemStack(Material.GOLD_INGOT);
         ItemMeta meta = rewardItem.getItemMeta();
         meta.setDisplayName("ここをクリックしてログインボーナスを受け取る");
         rewardItem.setItemMeta(meta);
-        inv.setItem(4, rewardItem); // Set the reward item in the center slot
+        inv.setItem(4, rewardItem);
 
         return inv;
     }
