@@ -20,6 +20,7 @@ import java.util.*;
 public class LoginReward extends JavaPlugin {
 
     private File dataFile;
+
     private YamlConfiguration dataConfig;
 
     private RewardGUI rewardGUI;
@@ -72,7 +73,7 @@ public class LoginReward extends JavaPlugin {
         try {
             dataConfig.save(dataFile);
         } catch (IOException ex) {
-            plugin.getLogger().severe("Could not save config to " + dataFile);
+            this.getLogger().severe("Could not save config to " + dataFile);
         }
     }
     //ログインボーナスのインベントリを開くメソッド
