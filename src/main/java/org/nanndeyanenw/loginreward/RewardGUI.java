@@ -14,11 +14,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 public class RewardGUI implements Listener {
 
+    public FileConfiguration getPlayerDataConfig() {
+        return this.playerData;
+    }
     private FileConfiguration playerData;
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
     public RewardGUI(LoginReward plugin) {
+        this.plugin = plugin;
+        this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
@@ -34,8 +39,8 @@ public class RewardGUI implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() != null && event.getView().getTitle().equals("Welcome Rewards")) {
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.DIAMOND) {
+        if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.EMERALD) {
                 Player player = (Player) event.getWhoClicked();
                 giveReward(player);
                 player.closeInventory();
@@ -56,7 +61,7 @@ public class RewardGUI implements Listener {
             case 5: rewardAmount = 600; break;
             case 6: rewardAmount = 800; break;
             case 7: rewardAmount = 1000; break;
-            default: rewardAmount = 1000; break;
+            default: rewardAmount = 50; break;
         }
 
         econ.depositPlayer(player, rewardAmount);
@@ -73,11 +78,11 @@ public class RewardGUI implements Listener {
     }
 
     private Inventory createGuiInventory() {
-        Inventory inv = Bukkit.createInventory(null, 9, "Welcome Rewards"); // 9 slots titled "Welcome Rewards"
+        Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス"); // 9 slots titled "Welcome Rewards"
 
         ItemStack rewardItem = new ItemStack(Material.EMERALD); // Example reward item
         ItemMeta meta = rewardItem.getItemMeta();
-        meta.setDisplayName("Click to get your reward!");
+        meta.setDisplayName("ここをクリックしてログインボーナスを受け取る");
         rewardItem.setItemMeta(meta);
 
         inv.setItem(4, rewardItem); // Set the reward item in the center slot
