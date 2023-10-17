@@ -40,6 +40,13 @@ public class RewardManager {
         }
     }
 
+    public int getConsecutiveDays(Player player) {
+        if (dataUtil.contains(player.getUniqueId() + ".consecutiveDays")) {
+            return (int) dataUtil.get(player.getUniqueId() + ".consecutiveDays");
+        }
+        return 0;
+    }
+
     public Reward getRewardForConsecutiveDays(int days) {
         if (days >= 7) {
             return rewards.get(7);
@@ -133,12 +140,7 @@ public class RewardManager {
         return playerMoney.getOrDefault(uuid, 0.0);
     }
 
-    public int getConsecutiveDays(Player player) {
-        if (dataUtil.contains(player.getUniqueId() + ".consecutiveDays")) {
-            return (int) dataUtil.get(player.getUniqueId() + ".consecutiveDays");
-        }
-        return 0;
-    }
+
 
     public Reward getRewardForDay(int day) {
         return switch (day) {
