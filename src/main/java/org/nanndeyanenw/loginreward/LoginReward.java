@@ -35,14 +35,8 @@ public class LoginReward extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        if (!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                getLogger().severe("playerdata.ymlを生成できませんでした。");
-                e.printStackTrace();
-            }
-        }
+        loadData(); //先にデータをロード
+
         rewardGUI = new RewardGUI(this);
         getServer().getPluginManager().registerEvents(rewardGUI, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
@@ -52,9 +46,7 @@ public class LoginReward extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        loadData();
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-
     }
 
     @Override
