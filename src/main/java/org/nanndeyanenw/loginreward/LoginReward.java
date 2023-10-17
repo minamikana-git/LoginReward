@@ -27,7 +27,7 @@ public class LoginReward extends JavaPlugin {
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
-    private RewardManager rewardManager;
+    public RewardManager rewardManager;
     private FileConfiguration playerData;
 
     public LoginReward() {

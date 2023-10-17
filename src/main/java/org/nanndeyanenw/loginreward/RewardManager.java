@@ -25,6 +25,7 @@ public class RewardManager {
     public Reward getLoginReward() {
         return loginReward;
     }
+
     private static RewardManager instance;
     private Economy econ;
 
@@ -133,7 +134,7 @@ public class RewardManager {
 
     public int getConsecutiveDays(Player player) {
         if (dataUtil.contains(player.getUniqueId() + ".consecutiveDays")) {
-            return (int) dataUtil.get(player.getUniqueId()+ ".consecutiveDays");
+            return (int) dataUtil.get(player.getUniqueId() + ".consecutiveDays");
         }
         return 0;
     }
@@ -167,6 +168,8 @@ public class RewardManager {
 
         return false;
     }
+
+
 }
 
 

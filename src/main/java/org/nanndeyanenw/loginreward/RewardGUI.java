@@ -40,7 +40,7 @@ public class RewardGUI implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.EMERALD) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.GOLD_INGOT) {
                 Player player = (Player) event.getWhoClicked();
                 giveReward(player);
                 player.closeInventory();
@@ -65,12 +65,14 @@ public class RewardGUI implements Listener {
         }
 
         econ.depositPlayer(player, rewardAmount);
-        player.sendMessage("You've received " + rewardAmount + " as your login reward!");
+        LoginReward loginRewardInstance = new LoginReward();
+        int day = loginRewardInstance.rewardManager.getConsecutiveDays(player);
+        player.sendMessage("あなたは" + day + "日目のログインボーナスを受け取りました。" + rewardAmount + "獲得しました。");
 
         // daysLoggedInを更新
         daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
-        plugin.savePlayerDataConfig(); // これもLoginRewardクラスでplayerDataを保存するメソッドを追加したことを想定しています。
+        plugin.savePlayerDataConfig();
     }
 
     public void open(Player player) {
@@ -80,11 +82,10 @@ public class RewardGUI implements Listener {
     private Inventory createGuiInventory() {
         Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス"); // 9 slots titled "Welcome Rewards"
 
-        ItemStack rewardItem = new ItemStack(Material.EMERALD); // Example reward item
+        ItemStack rewardItem = new ItemStack(Material.GOLD_INGOT); // Example reward item
         ItemMeta meta = rewardItem.getItemMeta();
         meta.setDisplayName("ここをクリックしてログインボーナスを受け取る");
         rewardItem.setItemMeta(meta);
-
         inv.setItem(4, rewardItem); // Set the reward item in the center slot
 
         return inv;
