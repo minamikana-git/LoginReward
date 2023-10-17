@@ -12,17 +12,21 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class RewardGUI implements Listener {
 
     public FileConfiguration getPlayerDataConfig() {
         return this.playerData;
     }
+
     private FileConfiguration playerData;
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
     public RewardGUI(LoginReward plugin) {
-        this.plugin = plugin;
         this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -40,13 +44,29 @@ public class RewardGUI implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.GOLD_INGOT) {
-                Player player = (Player) event.getWhoClicked();
-                giveReward(player);
-                player.closeInventory();
-                event.setCancelled(true);
+            event.setCancelled(true); // インベントリ内の移動をキャンセル
+
+            if (event.getCurrentItem() != null) {
+                Material itemType = event.getCurrentItem().getType();
+                if (itemType == Material.GOLD_INGOT) {
+                    Player player = (Player) event.getWhoClicked();
+                    if (!hasReceivedRewardToday(player)) {
+                        giveReward(player);
+                        player.closeInventory();
+                    } else {
+                        player.sendMessage("今日の報酬はすでに受け取っています。");
+                    }
+                }
             }
         }
+    }
+
+
+    private boolean hasReceivedRewardToday(Player player) {
+        String lastReceived = playerData.getString(player.getUniqueId().toString() + ".lastReceived", "");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+        return today.equals(lastReceived);
     }
 
     private void giveReward(Player player) {
@@ -54,19 +74,39 @@ public class RewardGUI implements Listener {
 
         double rewardAmount;
         switch (daysLoggedIn) {
-            case 1: rewardAmount = 50; break;
-            case 2: rewardAmount = 100; break;
-            case 3: rewardAmount = 200; break;
-            case 4: rewardAmount = 400; break;
-            case 5: rewardAmount = 600; break;
-            case 6: rewardAmount = 800; break;
-            case 7: rewardAmount = 1000; break;
-            default: rewardAmount = 50; break;
+            case 1:
+                rewardAmount = 50;
+                break;
+            case 2:
+                rewardAmount = 100;
+                break;
+            case 3:
+                rewardAmount = 200;
+                break;
+            case 4:
+                rewardAmount = 400;
+                break;
+            case 5:
+                rewardAmount = 600;
+                break;
+            case 6:
+                rewardAmount = 800;
+                break;
+            case 7:
+                rewardAmount = 1000;
+                break;
+            default:
+                rewardAmount = 50;
+                break;
         }
 
         econ.depositPlayer(player, rewardAmount);
         int day = plugin.rewardManager.getConsecutiveDays(player);
         player.sendMessage("あなたは" + day + "日目のログインボーナスを受け取りました。" + rewardAmount + "獲得しました。");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+        playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
 
         // daysLoggedInを更新
         daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
@@ -75,18 +115,33 @@ public class RewardGUI implements Listener {
     }
 
     public void open(Player player) {
-        player.openInventory(createGuiInventory());
+        player.openInventory(createGuiInventory(player));
     }
 
-    private Inventory createGuiInventory() {
-        Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス");
+    private Inventory createGuiInventory(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス"); // 9 slots titled "ログインボーナス"
 
-        ItemStack rewardItem = new ItemStack(Material.GOLD_INGOT);
-        ItemMeta meta = rewardItem.getItemMeta();
-        meta.setDisplayName("ここをクリックしてログインボーナスを受け取る");
-        rewardItem.setItemMeta(meta);
-        inv.setItem(4, rewardItem);
+        for (int i = 0; i < 9; i++) {
+            if (i == 4) {
+                if (hasReceivedRewardToday(player)) {
+                    inv.setItem(i, createItem(Material.BARRIER, "報酬を受け取りました"));
+                } else {
+                    inv.setItem(i, createItem(Material.GOLD_INGOT, "ここをクリックしてログインボーナスを受け取る"));
+                }
+            } else {
+                inv.setItem(i, createItem(Material.IRON_INGOT, "まだ取得できません"));
+            }
+        }
 
         return inv;
     }
+
+    private ItemStack createItem(Material material, String displayName) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(displayName);
+        item.setItemMeta(meta);
+        return item;
+    }
+
 }

@@ -24,7 +24,7 @@ public class RewardCommandExecutor implements CommandExecutor {
                 // GUIを表示
                 new RewardGUI(plugin).open(player);
             } else {
-                player.sendMessage("You have already claimed your reward today!");
+                player.sendMessage("今日の報酬はすでに受け取っています。");
             }
             return true;
         }
