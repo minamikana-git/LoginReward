@@ -122,7 +122,9 @@ public class RewardGUI implements Listener {
         Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス"); // 9 slots titled "ログインボーナス"
 
         for (int i = 0; i < 9; i++) {
-            if (i == 4) {
+            if (i == 0 || i == 8) {
+                inv.setItem(i, createItem(Material.GRAY_STAINED_GLASS_PANE, " ")); // 灰色のステンドグラス
+            } else if (i == 4) {
                 if (hasReceivedRewardToday(player)) {
                     inv.setItem(i, createItem(Material.BARRIER, "報酬を受け取りました"));
                 } else {
