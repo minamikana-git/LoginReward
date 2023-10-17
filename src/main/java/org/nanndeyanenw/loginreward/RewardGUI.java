@@ -3,6 +3,7 @@ package org.nanndeyanenw.loginreward;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 public class RewardGUI implements Listener {
 
+    private FileConfiguration playerData;
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
@@ -43,12 +45,9 @@ public class RewardGUI implements Listener {
     }
 
     private void giveReward(Player player) {
-        // ここでは報酬のロジックを実装します。
-        // 例えば、プレイヤーが何日ログインしたかに基づいて報酬を決定する。
+        int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
 
-        int daysLoggedIn = 0; // この情報をどこかから取得する必要があります。
         double rewardAmount;
-
         switch (daysLoggedIn) {
             case 1: rewardAmount = 50; break;
             case 2: rewardAmount = 100; break;
@@ -61,7 +60,12 @@ public class RewardGUI implements Listener {
         }
 
         econ.depositPlayer(player, rewardAmount);
-        player.sendMessage("日目の" + rewardAmount + " ログインボーナスを受け取りました。");
+        player.sendMessage("You've received " + rewardAmount + " as your login reward!");
+
+        // daysLoggedInを更新
+        daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
+        playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+        plugin.savePlayerDataConfig(); // これもLoginRewardクラスでplayerDataを保存するメソッドを追加したことを想定しています。
     }
 
     public void open(Player player) {
@@ -71,7 +75,7 @@ public class RewardGUI implements Listener {
     private Inventory createGuiInventory() {
         Inventory inv = Bukkit.createInventory(null, 9, "Welcome Rewards"); // 9 slots titled "Welcome Rewards"
 
-        ItemStack rewardItem = new ItemStack(Material.DIAMOND); // Example reward item
+        ItemStack rewardItem = new ItemStack(Material.EMERALD); // Example reward item
         ItemMeta meta = rewardItem.getItemMeta();
         meta.setDisplayName("Click to get your reward!");
         rewardItem.setItemMeta(meta);

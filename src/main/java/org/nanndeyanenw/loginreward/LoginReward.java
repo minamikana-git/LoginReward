@@ -1,27 +1,34 @@
 package org.nanndeyanenw.loginreward;
 
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.*;
 public class LoginReward extends JavaPlugin {
 
+    private File dataFile;
+    private YamlConfiguration dataConfig;
+
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
     private RewardManager rewardManager;
 
+    public LoginReward() {
+    }
 
     @Override
     public void onEnable() {
@@ -57,6 +64,17 @@ public class LoginReward extends JavaPlugin {
         return true;
     }
 
+
+    public void savePlayerDataConfig() {
+        if (dataConfig == null || dataFile == null) {
+            return;
+        }
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException ex) {
+            plugin.getLogger().severe("Could not save config to " + dataFile);
+        }
+    }
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
         Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
