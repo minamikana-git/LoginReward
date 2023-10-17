@@ -38,9 +38,10 @@ public class RewardGUI implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        open(player);
+        if (!hasReceivedRewardToday(player)) {
+            open(player);
+        }
     }
-
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
