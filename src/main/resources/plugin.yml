@@ -5,8 +5,16 @@ api-version: '1.20'
 load: STARTUP
 depend:
   - "Vault"
-softdepend:
-  - "Vault"
 commands:
- loginreward:
-   usage: loginreward
+  loginreward:
+    description: "ログインボーナスのコマンド"
+    usage: "/loginreward"
+  debugdate:
+    description: "デバッグ用の日付表示コマンド"
+    usage: "/debugdate"
+    permission: "loginreward.debugdate"
+    default: op
+permissions:
+  loginreward.debugdate:
+    description: "デバッグ日付コマンドを実行する権限"
+    default: op
