@@ -52,13 +52,12 @@ public class RewardGUI implements Listener {
                 if (itemType == Material.GOLD_INGOT) {
                     Player player = (Player) event.getWhoClicked();
                     if (!hasReceivedRewardToday(player)) {
-                        giveReward(player);
+                       handleRewardForPlayer(player);
                         Bukkit.getLogger().info("Saving data for " + player.getName() + ": " + playerData.getString(player.getUniqueId().toString() + ".lastReceived"));
                     } else {
                         player.closeInventory();
                         player.sendMessage("今日の報酬はすでに受け取っています。");
                     }
-
                 }
             }
         }
@@ -83,9 +82,8 @@ public class RewardGUI implements Listener {
         return true;
     }
 
-    private void giveReward(Player player) {
+    private double giveReward(Player player) {
         int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
-
         double rewardAmount;
         switch (daysLoggedIn) {
             case 1:
@@ -115,17 +113,27 @@ public class RewardGUI implements Listener {
         }
 
         econ.depositPlayer(player, rewardAmount);
-        int day = plugin.rewardManager.getConsecutiveDays(player);
-        player.sendMessage("あなたは" + day + "日目のログインボーナスを受け取りました。" + rewardAmount + "獲得しました。");
+        return rewardAmount; // 報酬の金額を返す
+    }
+
+
+    private void handleRewardForPlayer(Player player) {
+        int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+        double rewardAmount = giveReward(player);
+
+        player.sendMessage("あなたは" + (daysLoggedIn + 1) + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
         playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
+
         // daysLoggedInを更新
         daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+
         plugin.savePlayerDataConfig();
     }
+
 
     public void open(Player player) {
         player.openInventory(createGuiInventory(player));
