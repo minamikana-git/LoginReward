@@ -13,8 +13,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -54,14 +52,17 @@ public class RewardGUI implements Listener {
                     Player player = (Player) event.getWhoClicked();
                     if (!hasReceivedRewardToday(player)) {
                         giveReward(player);
-                        player.closeInventory();
+                        Bukkit.getLogger().info("Saving data for " + player.getName() + ": " + playerData.getString(player.getUniqueId().toString() + ".lastReceived"));
                     } else {
+                        player.closeInventory();
                         player.sendMessage("今日の報酬はすでに受け取っています。");
+                    }
+
                     }
                 }
             }
         }
-    }
+
 
 
     private boolean hasReceivedRewardToday(Player player) {
@@ -69,6 +70,9 @@ public class RewardGUI implements Listener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
 
+        Bukkit.getLogger().info("Checking data for " + player.getName());
+        Bukkit.getLogger().info("Today: " + today);
+        Bukkit.getLogger().info("Last received: " + lastReceived);
         Bukkit.getLogger().info("Today: " + today); //デバッグ用コード
         Bukkit.getLogger().info("Last received: " + lastReceived); //デバッグ用コード
 
