@@ -1,6 +1,5 @@
 package org.nanndeyanenw.loginreward;
 
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
