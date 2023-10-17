@@ -100,7 +100,6 @@ public class LoginReward extends JavaPlugin {
                 inventory.addItem(stack);
             }
         }
-
         player.openInventory(inventory);
     }
 
