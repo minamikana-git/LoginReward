@@ -48,6 +48,7 @@ public class RewardManager {
     }
 
     public void giveLoginReward(Player player) {
+
         int consecutiveDays = getConsecutiveDays(player);
         Reward reward = getRewardForConsecutiveDays(consecutiveDays);
 
