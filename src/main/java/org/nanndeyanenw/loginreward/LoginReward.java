@@ -30,13 +30,14 @@ public class LoginReward extends JavaPlugin {
     public RewardManager rewardManager;
     private FileConfiguration playerData;
 
+    private static LoginReward instance;
     public LoginReward() {
     }
 
     @Override
     public void onEnable() {
         loadData(); //先にデータをロード
-
+        instance = this;
         rewardGUI = new RewardGUI(this);
         getServer().getPluginManager().registerEvents(rewardGUI, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
@@ -51,6 +52,7 @@ public class LoginReward extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        instance = null;
         if (rewardManager != null) {
             rewardManager.saveData();
         }
@@ -127,6 +129,9 @@ public class LoginReward extends JavaPlugin {
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+    }
+    public static LoginReward getInstance() {
+        return instance;
     }
 }
 
