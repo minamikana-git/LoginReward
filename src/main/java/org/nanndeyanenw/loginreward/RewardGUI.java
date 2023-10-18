@@ -73,18 +73,12 @@ public class RewardGUI implements Listener {
             // 初回ログインの場合、データをセットせずにfalseを返す
             return false;
         }
-
         String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
 
-        if (!today.equals(lastReceived)) {
-            playerData.set(uniqueId + ".lastReceived", today);
-            plugin.savePlayerDataConfig(); // ここでplayerDataを実際のファイルに保存
-            return false;
-        }
-        return true;
-        }
+        return today.equals(lastReceived);
+    }
 
         private double giveReward (Player player){
             int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
