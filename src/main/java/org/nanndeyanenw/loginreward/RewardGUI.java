@@ -52,7 +52,11 @@ public class RewardGUI implements Listener {
                 if (itemType == Material.GOLD_INGOT) {
                     Player player = (Player) event.getWhoClicked();
                     if (!hasReceivedRewardToday(player)) {
-                       handleRewardForPlayer(player);
+                        handleRewardForPlayer(player);
+
+                        // ここでバリアブロックに更新します。
+                        event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
+
                         Bukkit.getLogger().info("Saving data for " + player.getName() + ": " + playerData.getString(player.getUniqueId().toString() + ".lastReceived"));
                     } else {
                         player.closeInventory();
