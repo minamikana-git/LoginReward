@@ -22,7 +22,6 @@ public class RewardCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-
             // 新しいコマンド "debugdate" を追加
             if (cmd.getName().equalsIgnoreCase("debugdate")) {
                 if (!player.hasPermission("loginreward.debugdate")){

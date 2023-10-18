@@ -41,6 +41,7 @@ public class LoginReward extends JavaPlugin {
         rewardGUI = new RewardGUI(this);
         getServer().getPluginManager().registerEvents(rewardGUI, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
+        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
