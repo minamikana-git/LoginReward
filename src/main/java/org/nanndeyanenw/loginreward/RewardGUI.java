@@ -130,6 +130,9 @@ public class RewardGUI implements Listener {
             playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
 
             plugin.savePlayerDataConfig();
+            //GUIを再度開くことで、更新を反映させる
+            player.closeInventory(); //一度閉じる
+            open(player); //GUIを開く。
         }
 
 
@@ -159,7 +162,6 @@ public class RewardGUI implements Listener {
             }
             return inv;
         }
-
 
         private ItemStack createItem (Material material, String displayName){
             ItemStack item = new ItemStack(material);
