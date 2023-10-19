@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class RewardGUI implements Listener {
@@ -127,10 +128,16 @@ public class RewardGUI implements Listener {
             rewardAmount = giveReward(player);
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String today = sdf.format(new Date());
+            String lastReceivedDateStr = playerData.getString(player.getUniqueId().toString() + ".lastReceived");
+            Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
+            Calendar cal = Calendar.getInstance();
             playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
             // daysLoggedInを更新
-            daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
+            Date yesterday = cal.getTime();
+            cal.add(Calendar.DAY_OF_MONTH, -1);
+            if(lastReceivedDate.before(yesterday)){
+                daysLoggedIn = (daysLoggedIn >=daysLoggedIn 7) ? 1: daysLoggedIn + 1;// 7日目を超えたらリセット
+            }
             playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
             plugin.savePlayerDataConfig();
             //GUIを再度開くことで、更新を反映させる

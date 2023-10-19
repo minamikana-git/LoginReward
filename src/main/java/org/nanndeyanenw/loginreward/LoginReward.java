@@ -7,9 +7,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -43,7 +45,7 @@ public class LoginReward extends JavaPlugin {
         instance = this;// SaveDataのインスタンスを作成
         saveData = new SaveData(this, dataConfig, dataFile);
         rewardGUI = new RewardGUI(this, saveData);
-
+        Bukkit.getServer().getPluginManager().registerEvents(new RewardGUI(),this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
@@ -101,7 +103,7 @@ public class LoginReward extends JavaPlugin {
             }
             Reward reward = rewardManager.getRewardForDay(i);
             if (reward != null) {
-                ItemStack stack = createItemStack(Material.GOLD_NUGGET, "§a" + reward.getMessage(), "§e" + reward.getAmount() + "NANDE!");
+                ItemStack stack = createItemStack(Material.GOLD_INGOT, "§a" + reward.getMessage(), "§e" + reward.getAmount() + "NANDE!");
                 inventory.addItem(stack);
             }
         }
