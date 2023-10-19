@@ -20,7 +20,7 @@ public class SaveData {
 
     private static File dataFile;
 
-    public SaveData(LoginReward plugin,FileConfiguration dataConfig, DataUtil dataUtil, Map<UUID,Double>playerMoney, File dataFile){
+    public SaveData(LoginReward plugin, FileConfiguration dataConfig, File dataFile){
         this.plugin = plugin;
         this.dataConfig = dataConfig;
         this.dataUtil = dataUtil;

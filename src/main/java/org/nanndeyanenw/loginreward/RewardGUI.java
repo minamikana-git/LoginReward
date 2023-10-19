@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RewardGUI implements Listener {
-
+    private SaveData saveDataInstance;
     public FileConfiguration getPlayerDataConfig() {
         return this.playerData;
     }
@@ -26,12 +26,8 @@ public class RewardGUI implements Listener {
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
     private SaveData saveData;
-    private SaveData saveDataInstance;
 
-
-
-
-    public RewardGUI(LoginReward plugin) {
+    public RewardGUI(LoginReward plugin, SaveData saveData) {
         this.saveDataInstance = saveData;
         this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;

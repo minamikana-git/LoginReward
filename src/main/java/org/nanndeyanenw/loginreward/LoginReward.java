@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.*;
+
 public class LoginReward extends JavaPlugin {
 
     private File dataFile;
@@ -31,15 +32,18 @@ public class LoginReward extends JavaPlugin {
     private FileConfiguration playerData;
 
     private static LoginReward instance;
+
+    private SaveData saveData;
     public LoginReward() {
     }
 
     @Override
     public void onEnable() {
         loadData(); //先にデータをロード
-        instance = this;
-        rewardGUI = new RewardGUI(this);
-        getServer().getPluginManager().registerEvents(rewardGUI, this);
+        instance = this;// SaveDataのインスタンスを作成
+        saveData = new SaveData(this, dataConfig, dataFile);
+        rewardGUI = new RewardGUI(this, saveData);
+
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
@@ -131,7 +135,12 @@ public class LoginReward extends JavaPlugin {
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
     public static LoginReward getInstance() {
+
         return instance;
+    }
+
+    public RewardGUI getRewardGUI(){
+        return this.rewardGUI;
     }
 }
 

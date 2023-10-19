@@ -41,7 +41,7 @@ public class RewardCommandExecutor implements CommandExecutor {
             }
             if (!rewardManager.hasClaimedReward(player)) {
                 // GUIを表示
-                new RewardGUI(plugin).open(player);
+                plugin.getRewardGUI().open(player);
             } else {
                 player.sendMessage("今日の報酬はすでに受け取っています。");
             }
