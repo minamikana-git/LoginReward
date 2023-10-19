@@ -3,11 +3,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -117,7 +115,7 @@ public class RewardManager {
     }
 
     public double getPlayerMoney(UUID uuid) {
-        return playerMoney.getOrDefault(uuid, 0.0);
+        return playerMoney.getOrDefault(uuid, 50.0);
     }
 
 
@@ -173,8 +171,3 @@ public class RewardManager {
     }
 
 }
-
-
-
-
-

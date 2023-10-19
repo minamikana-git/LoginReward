@@ -120,16 +120,15 @@ public class RewardGUI implements Listener {
         }
 
 
-        private void handleRewardForPlayer (Player player){
+        private void handleRewardForPlayer (Player player) {
             int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
-            double rewardAmount = giveReward(player);
-
+            double rewardAmount = 0;
+            econ.depositPlayer(player, rewardAmount);
+            rewardAmount = giveReward(player);
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String today = sdf.format(new Date());
             playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
-
             // daysLoggedInを更新
             daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
             playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
