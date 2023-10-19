@@ -3,13 +3,17 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 public class RewardManager {
 
     private DataUtil dataUtil;
@@ -73,9 +77,8 @@ public class RewardManager {
         String path = playerUUID.toString() + ".consecutiveDays";
 
         dataConfig.set(path, days); // dataConfig に連続ログイン日数をセットします
-        saveDataConfig(); // 変更をYMLファイルに保存します
+        SaveData.saveDataConfig(); // 変更をYMLファイルに保存します
     }
-
 
     public static RewardManager getInstance(LoginReward plugin) {
         if (instance == null) {
@@ -90,8 +93,8 @@ public class RewardManager {
 
     private void setupDataConfig() {
         if (dataFile == null) {
-            dataFile = new File(plugin.getDataFolder(), "playerdata.yml");
-        }
+        dataFile = new File(plugin.getDataFolder(), "playerdata.yml");
+    }
         if (!dataFile.exists()) {
             plugin.saveResource("playerdata.yml", false);
         }
@@ -99,13 +102,7 @@ public class RewardManager {
     }
 
 
-    private void saveDataConfig() {
-        try {
-            dataConfig.save(dataFile);
-        } catch (IOException e) {
-            plugin.getLogger().severe("Could not save player data to " + dataFile);
-        }
-    }
+
 
     private boolean setupEconomy() {
         if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -117,23 +114,6 @@ public class RewardManager {
         }
         econ = rsp.getProvider();
         return econ != null;
-    }
-
-    public void loadData() {
-        if (dataUtil.contains("playerMoney")) {
-            playerMoney.clear();
-            for (String uuidString : dataUtil.getConfigurationSection("playerMoney").getKeys(false)) {
-                UUID uuid = UUID.fromString(uuidString);
-                double money = dataUtil.getDouble("playerMoney." + uuidString);
-                playerMoney.put(uuid, money);
-            }
-        }
-    }
-
-    public void saveData() {
-        for (UUID uuid : playerMoney.keySet()) {
-            dataUtil.set("playerMoney." + uuid.toString(), playerMoney.get(uuid));
-        }
     }
 
     public double getPlayerMoney(UUID uuid) {
@@ -172,8 +152,28 @@ public class RewardManager {
         return false;
     }
 
+    public void incrementLoginDays(Player player) {
+        // プレイヤーのUUIDをキーとして使用
+        String playerUUID = player.getUniqueId().toString();
+
+        // 既にデータがある場合はその値を取得、なければ0を返す
+        int currentDays = dataConfig.getInt(playerUUID + ".days", 0);
+
+        // ログイン日数をインクリメント
+        int updatedDays = currentDays + 1;
+
+        // 更新したログイン日数をdataConfigに保存
+        dataConfig.set(playerUUID + ".days", updatedDays);
+
+        // 今回のログインの日付も保存
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(date);
+        dataConfig.set(playerUUID + ".lastLoginDate", formattedDate);
+    }
 
 }
+
 
 
 

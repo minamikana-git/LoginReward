@@ -55,7 +55,7 @@ public class LoginReward extends JavaPlugin {
     public void onDisable() {
         instance = null;
         if (rewardManager != null) {
-            rewardManager.saveData();
+            SaveData.saveData();
         }
     }
 

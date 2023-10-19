@@ -9,6 +9,19 @@ import java.io.File;
 import java.io.IOException;
 
 public class DataUtil {
+
+    private static FileConfiguration config;
+    private static File file;
+
+    public static void setConfig(FileConfiguration config) {
+        DataUtil.config = config;
+    }
+
+    public static void setFile(File file) {
+        DataUtil.file = file;
+    }
+
+
     public static int getDaysLoggedIn(Player player) {
         return dataConfig.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 0);
     }
@@ -31,8 +44,8 @@ public class DataUtil {
             e.printStackTrace();
         }
     }
-    private static YamlConfiguration dataConfig;
-    private static File dataFile;
+    public static YamlConfiguration dataConfig;
+    public static File dataFile;
 
     private final LoginReward plugin;
     private File file;
@@ -59,7 +72,7 @@ public class DataUtil {
         config = YamlConfiguration.loadConfiguration(file);
     }
 
-    public void set(String path, Object value) {
+    public static void set(String path, Object value) {
         config.set(path, value);
         save();
     }
@@ -72,13 +85,15 @@ public class DataUtil {
         return config.contains(path);
     }
 
-    public void save() {
+    public static void save() {
         try {
             config.save(file);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 
     public double getDouble(String path) {
         return config.getDouble(path);
@@ -87,4 +102,6 @@ public class DataUtil {
     public ConfigurationSection getConfigurationSection(String path) {
         return config.getConfigurationSection(path);
     }
+
+
 }

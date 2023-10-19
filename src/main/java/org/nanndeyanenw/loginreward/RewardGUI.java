@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,6 +27,8 @@ public class RewardGUI implements Listener {
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
+
+
     public RewardGUI(LoginReward plugin) {
         this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;
@@ -39,6 +42,10 @@ public class RewardGUI implements Listener {
         Player player = event.getPlayer();
         if (!hasReceivedRewardToday(player)) {
             open(player);
+            // ログイン日数をインクリメント
+            SaveData.incrementLoginDays(player);
+            // dataConfigに変更があったので保存
+            SaveData.saveDataConfig();
         }
     }
 
@@ -56,8 +63,6 @@ public class RewardGUI implements Listener {
 
                         // ここでバリアブロックに更新します。
                         event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
-
-                        Bukkit.getLogger().info("Saving data for " + player.getName() + ": " + playerData.getString(player.getUniqueId().toString() + ".lastReceived"));
                     } else {
                         player.closeInventory();
                         player.sendMessage("今日の報酬はすでに受け取っています。");
@@ -128,7 +133,6 @@ public class RewardGUI implements Listener {
             // daysLoggedInを更新
             daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
             playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
-
             plugin.savePlayerDataConfig();
             //GUIを再度開くことで、更新を反映させる
             player.closeInventory(); //一度閉じる
