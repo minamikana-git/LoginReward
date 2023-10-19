@@ -27,7 +27,6 @@ public class RewardGUI implements Listener {
     private FileConfiguration playerData;
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
-    private SaveData saveData;
 
     public RewardGUI(LoginReward plugin, SaveData saveData) {
         this.saveDataInstance = saveData;
@@ -53,7 +52,7 @@ public class RewardGUI implements Listener {
 
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) throws ParseException {
         if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
             event.setCancelled(true); // インベントリ内の移動をキャンセル
 
@@ -77,9 +76,6 @@ public class RewardGUI implements Listener {
 
     private boolean hasReceivedRewardToday(Player player) {
         String uniqueId = player.getUniqueId().toString();
-        if (!playerData.contains(uniqueId + ".lastReceived")) {
-
-        }
         String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
@@ -122,24 +118,26 @@ public class RewardGUI implements Listener {
         }
 
 
-        private void handleRewardForPlayer (Player player) throws ParseException {
-            int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1);
-            double rewardAmount = 0;
-            rewardAmount = giveReward(player);
-            player.sendMessage("あなたは"+ daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+    private void handleRewardForPlayer (Player player) throws ParseException {
+        int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+        double rewardAmount = 0;
+        rewardAmount = giveReward(player);
+        player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String lastReceivedDateStr = playerData.getString(player.getUniqueId().toString() + ".lastReceived");
-            Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_MONTH,-1);
-            Date yesterday = cal.getTime();
-            if(lastReceivedDate.before(yesterday)){
-                daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1;
-            }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String lastReceivedDateStr = playerData.getString(player.getUniqueId().toString() + ".lastReceived");
+        Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
+
+        Calendar cal = Calendar.getInstance();
+
+        // この部分を追加
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Date yesterday = cal.getTime();
+        if (lastReceivedDate.before(yesterday)) {
+            daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         }
 
-        cal.add(Calendar.DAY_OF_MONTH, 1);
+        cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
         playerData.set(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime())); // 今日の日付を文字列として記録
 
         playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
@@ -148,6 +146,7 @@ public class RewardGUI implements Listener {
         //GUIを再度開くことで、更新を反映させる
         player.closeInventory(); //一度閉じる
         open(player); //GUIを開く。
+    }
 
 
         public void open (Player player){
