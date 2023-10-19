@@ -13,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -121,29 +122,32 @@ public class RewardGUI implements Listener {
         }
 
 
-        private void handleRewardForPlayer (Player player) {
-            int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+        private void handleRewardForPlayer (Player player) throws ParseException {
+            int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1);
             double rewardAmount = 0;
-            econ.depositPlayer(player, rewardAmount);
             rewardAmount = giveReward(player);
-            player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+            player.sendMessage("あなたは"+ daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String lastReceivedDateStr = playerData.getString(player.getUniqueId().toString() + ".lastReceived");
             Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
             Calendar cal = Calendar.getInstance();
-            playerData.set(player.getUniqueId().toString() + ".lastReceived", today); // 今日の日付を記録
-            // daysLoggedInを更新
+            cal.add(Calendar.DAY_OF_MONTH,-1);
             Date yesterday = cal.getTime();
-            cal.add(Calendar.DAY_OF_MONTH, -1);
             if(lastReceivedDate.before(yesterday)){
-                daysLoggedIn = (daysLoggedIn >=daysLoggedIn 7) ? 1: daysLoggedIn + 1;// 7日目を超えたらリセット
+                daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1;
             }
-            playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
-            plugin.savePlayerDataConfig();
-            //GUIを再度開くことで、更新を反映させる
-            player.closeInventory(); //一度閉じる
-            open(player); //GUIを開く。
         }
+
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        playerData.set(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime())); // 今日の日付を文字列として記録
+
+        playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+        plugin.savePlayerDataConfig();
+
+        //GUIを再度開くことで、更新を反映させる
+        player.closeInventory(); //一度閉じる
+        open(player); //GUIを開く。
 
 
         public void open (Player player){
