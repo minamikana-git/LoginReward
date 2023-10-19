@@ -3,6 +3,8 @@ package org.nanndeyanenw.loginreward;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerLoginEvent;
+
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,16 +13,20 @@ import java.util.UUID;
 
 public class SaveData {
 
-    private LoginReward plugin;
-    private FileConfiguration dataConfig;
-    private DataUtil dataUtil;
-    private Map<UUID,Double> playerMoney;
+    private static LoginReward plugin;
+    private static FileConfiguration dataConfig;
+    private static DataUtil dataUtil;
+    private static Map<UUID,Double> playerMoney;
 
-    public SaveData(LoginReward plugin,FileConfiguration dataConfig, DataUtil dataUtil, Map<UUID,Double>playerMoney){
+    private static File dataFile;
+
+    public SaveData(LoginReward plugin,FileConfiguration dataConfig, DataUtil dataUtil, Map<UUID,Double>playerMoney, File dataFile){
         this.plugin = plugin;
         this.dataConfig = dataConfig;
         this.dataUtil = dataUtil;
         this.playerMoney = playerMoney;
+        this.dataFile = dataFile;
+
     }
     public static void saveDataConfig() {
         try {
@@ -42,17 +48,12 @@ public class SaveData {
         }
     }
 
-    public void saveData() {
+    public static void saveData() {
         for (UUID uuid : playerMoney.keySet()) {
-            dataUtil.set("playerMoney." + uuid.toString(), playerMoney.get(uuid)); // DataUtil から dataUtil に変更
+            dataUtil.set("playerMoney." + uuid.toString(), playerMoney.get(uuid));
         }
         // 変更をディスクに保存する
-        try {
-            dataUtil.save(dataFile);  // DataUtil から dataUtil に変更
-        } catch (IOException e) {
-            plugin.getLogger().severe("Could not save data to " + dataFile);
-            e.printStackTrace();
-        }
+        dataUtil.save();  // 引数なしで呼び出す
     }
 
     public void onPlayerLogin(PlayerLoginEvent event) {
@@ -65,7 +66,7 @@ public class SaveData {
         saveDataConfig();
     }
 
-    public static void incrementLoginDays(Player player) {
+    public void incrementLoginDays(Player player) {
         // プレイヤーのUUIDをキーとして使用
         String playerUUID = player.getUniqueId().toString();
 
@@ -84,5 +85,4 @@ public class SaveData {
         String formattedDate = dateFormat.format(date);
         dataConfig.set(playerUUID + ".lastLoginDate", formattedDate);
     }
-
 }

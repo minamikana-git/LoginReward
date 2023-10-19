@@ -48,8 +48,6 @@ public class DataUtil {
     public static File dataFile;
 
     private final LoginReward plugin;
-    private File file;
-    private FileConfiguration config;
 
     public DataUtil(LoginReward plugin) {
         this.plugin = plugin;
@@ -76,8 +74,7 @@ public class DataUtil {
         config.set(path, value);
         save();
     }
-
-    public Object get(String path) {
+    public static Object get(String path) {
         return config.get(path);
     }
 
@@ -95,11 +92,11 @@ public class DataUtil {
 
 
 
-    public double getDouble(String path) {
+    public static double getDouble(String path) {
         return config.getDouble(path);
     }
 
-    public ConfigurationSection getConfigurationSection(String path) {
+    public static ConfigurationSection getConfigurationSection(String path) {
         return config.getConfigurationSection(path);
     }
 

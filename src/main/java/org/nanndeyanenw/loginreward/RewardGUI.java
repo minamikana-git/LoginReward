@@ -7,9 +7,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -26,10 +25,14 @@ public class RewardGUI implements Listener {
     private FileConfiguration playerData;
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
+    private SaveData saveData;
+    private SaveData saveDataInstance;
+
 
 
 
     public RewardGUI(LoginReward plugin) {
+        this.saveDataInstance = saveData;
         this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -37,17 +40,19 @@ public class RewardGUI implements Listener {
         }
     }
 
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!hasReceivedRewardToday(player)) {
             open(player);
             // ログイン日数をインクリメント
-            SaveData.incrementLoginDays(player);
+            saveDataInstance.incrementLoginDays(player);
             // dataConfigに変更があったので保存
-            SaveData.saveDataConfig();
+            saveDataInstance.saveDataConfig();
         }
     }
+
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
@@ -75,8 +80,7 @@ public class RewardGUI implements Listener {
     private boolean hasReceivedRewardToday(Player player) {
         String uniqueId = player.getUniqueId().toString();
         if (!playerData.contains(uniqueId + ".lastReceived")) {
-            // 初回ログインの場合、データをセットせずにfalseを返す
-            return false;
+
         }
         String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
