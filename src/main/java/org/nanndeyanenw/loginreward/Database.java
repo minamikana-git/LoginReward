@@ -3,17 +3,24 @@ package org.nanndeyanenw.loginreward;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Database {
     private Connection connection;
     private String url;
-
-
+    private final String dbPath;
+    public Database(String dbPath) {
+        this.dbPath = dbPath;
+        connect();
+    }
 
     public Database(String filename) {
         this.url = "jdbc:sqlite:" + filename;
     }
+
+
 
     public Connection connect() throws SQLException {
         if (connection == null || connection.isClosed()) {
@@ -91,7 +98,24 @@ public class Database {
         return lastReceivedDate;
     }
 
-    public FileConfiguration getPlayerData() {
+    public Map<String, Object> getPlayerData(UUID playerUUID) {
+        Map<String, Object> playerDataMap = new HashMap<>();
 
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM player_data WHERE uuid = ?");
+            ps.setString(1, playerUUID.toString());
+            ResultSet resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                playerDataMap.put("uuid", resultSet.getString("uuid"));
+                playerDataMap.put("lastReceived", resultSet.getString("lastReceived"));
+                playerDataMap.put("daysLoggedIn", resultSet.getInt("daysLoggedIn"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return playerDataMap;
     }
+
 }
