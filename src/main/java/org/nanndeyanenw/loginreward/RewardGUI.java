@@ -24,7 +24,9 @@ import java.util.Date;
 public class RewardGUI implements Listener {
     private SaveData saveData;
 
-    private FileConfiguration playerData = Database.Database;
+    private Database databaseInstance = new Database("player_data.db");
+    private FileConfiguration playerData;
+
 
     private Connection connection;
 
@@ -37,7 +39,7 @@ public class RewardGUI implements Listener {
 
     public RewardGUI(LoginReward plugin, SaveData saveData) {
         this.saveData = saveData;
-        this.playerData = Database.Database;
+        this.playerData = databaseInstance.getPlayerData();
         this.plugin = plugin;
         connect();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -211,7 +213,7 @@ public class RewardGUI implements Listener {
 
 
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE playerdata SET lastReceived = ? WHERE uuid = ?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE player_data SET lastReceived = ? WHERE uuid = ?");
             ps.setString(1, sdf.format(cal.getTime()));
             ps.setString(2, player.getUniqueId().toString());
             ps.executeUpdate();

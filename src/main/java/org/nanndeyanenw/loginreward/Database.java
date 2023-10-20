@@ -1,5 +1,7 @@
 package org.nanndeyanenw.loginreward;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
 import java.sql.*;
 import java.util.UUID;
 
@@ -87,5 +89,9 @@ public class Database {
         }
 
         return lastReceivedDate;
+    }
+
+    public FileConfiguration getPlayerData() {
+
     }
 }
