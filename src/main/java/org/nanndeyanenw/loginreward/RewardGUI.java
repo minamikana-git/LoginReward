@@ -1,5 +1,6 @@
 package org.nanndeyanenw.loginreward;
 
+
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,20 +22,22 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class RewardGUI implements Listener {
-    private SaveData saveDataInstance;
+    private SaveData saveData;
+
+    private FileConfiguration playerData = Database.Database;
 
     private Connection connection;
-    public FileConfiguration getPlayerDataConfig() {
-        return this.playerData;
-    }
 
-    private FileConfiguration playerData;
+
+    public void saveDataConfig(){
+        saveData.saveData();
+    }
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
     public RewardGUI(LoginReward plugin, SaveData saveData) {
-        this.saveDataInstance = saveData;
-        this.playerData = plugin.getPlayerDataConfig();
+        this.saveData = saveData;
+        this.playerData = Database.Database;
         this.plugin = plugin;
         connect();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
@@ -55,11 +58,11 @@ public class RewardGUI implements Listener {
                 }
 
                 Class.forName("org.sqlite.JDBC");
-                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "playerdata.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
 
                 // 必要なテーブルを初期化（存在しない場合）
                 Statement statement = connection.createStatement();
-                String sql = "CREATE TABLE IF NOT EXISTS playerdata (uuid STRING, lastReceived STRING, daysLoggedIn INT)";
+                String sql = "CREATE TABLE IF NOT EXISTS player_data (uuid STRING, lastReceived STRING, daysLoggedIn INT)";
                 statement.execute(sql);
                 statement.close();
             }
@@ -79,7 +82,7 @@ public class RewardGUI implements Listener {
     }
     public int getDaysLoggedIn(Player player) {
         try {
-            PreparedStatement ps = connection.prepareStatement("SELECT daysLoggedIn FROM playerdata WHERE uuid = ?");
+            PreparedStatement ps = connection.prepareStatement("SELECT daysLoggedIn FROM player_data WHERE uuid = ?");
             ps.setString(1, player.getUniqueId().toString());
             ResultSet resultSet = ps.executeQuery();
 
@@ -101,9 +104,9 @@ public class RewardGUI implements Listener {
             if (!hasReceivedRewardToday(player)) {
                 open(player);
                 // ログイン日数をインクリメント
-                saveDataInstance.incrementLoginDays(player);
+                saveData.incrementLoginDays(player);
                 // dataConfigに変更があったので保存
-                saveDataInstance.saveDataConfig();
+                saveData.saveData();
             }
         }
 

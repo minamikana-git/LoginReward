@@ -58,7 +58,7 @@ public class DataUtil {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        file = new File(plugin.getDataFolder(), "playerdata.db");
+        file = new File(plugin.getDataFolder(), "player_data.db");
 
         if (!file.exists()) {
             try {

@@ -47,8 +47,7 @@ public class SaveData {
                         if (connection != null && !connection.isClosed()) {
                             return;
                         }
-                        Class.forName("org.sqlite.JDBC");
-                        connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "playerdata.db");
+                        connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -103,7 +102,6 @@ public class SaveData {
                     if (rs.next()) {
                         currentDays = rs.getInt("login_days");
                     }
-
 
                     int updatedDays = currentDays + 1;
 

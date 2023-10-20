@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     private Database database;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
-
+    private Connection connection;
     public RewardManager rewardManager;
     private static LoginReward instance;
     public LoginReward(String dbFilename) {
@@ -46,18 +47,27 @@ public class LoginReward extends JavaPlugin implements Listener {
         }
     }
     public void onEnable() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);{
-
-            getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-            getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
-            this.rewardManager = RewardManager.getInstance(this);
-            if (rewardManager == null) {
-                getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
-                getServer().getPluginManager().disablePlugin(this);
-
+        Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
+        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
+        this.rewardManager = RewardManager.getInstance(this);
+        if (rewardManager == null) {
+            getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
+            getServer().getPluginManager().disablePlugin(this);
+        } else {
+            try {
+                Class.forName("org.sqlite.JDBC"); // SQLite JDBC ドライバをロード
+                connection = DriverManager.getConnection("jdbc:sqlite:" + this.getDataFolder() + File.separator + "player_data.db");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                getLogger().severe("データベースへの接続に失敗しました。");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                getLogger().severe("SQLite JDBC ドライバが見つかりませんでした。");
             }
         }
     }
+
 
 
     @EventHandler
@@ -76,7 +86,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     private int getLoginDays(UUID uuid) {
-        String sql = "SELECT days FROM players WHERE uuid = ?";
+        String sql = "SELECT days FROM player_data WHERE uuid = ?";
         try (Connection conn = database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, uuid.toString());
@@ -91,7 +101,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     private void savePlayerData(UUID uuid, int days, String lastLoginDate) {
-        String sql = "INSERT OR REPLACE INTO players (uuid, days, lastLoginDate) VALUES (?, ?, ?)";
+        String sql = "INSERT OR REPLACE INTO player_data(uuid, days, lastLoginDate) VALUES (?, ?, ?)";
         try (Connection conn = database.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, uuid.toString());
@@ -120,6 +130,7 @@ public class LoginReward extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
     }
+
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("loginreward")) {
@@ -172,5 +183,8 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI(){
         return this.rewardGUI;
     }
-}
 
+    public Database getDatabase() {
+        return this.database;
+    }
+}

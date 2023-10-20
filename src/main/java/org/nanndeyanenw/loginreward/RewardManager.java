@@ -49,8 +49,8 @@ public class RewardManager {
             }
 
             // ここでは適切なデータベースの場所と名前を設定する必要があります
-            Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "playerdata.db");
+            Class.forName("RewardManager");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
 
     } catch (Exception e) {
         e.printStackTrace();

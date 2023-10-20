@@ -18,6 +18,7 @@ public class RewardCommandExecutor implements CommandExecutor {
     public RewardCommandExecutor(LoginReward plugin) {
         this.plugin = plugin;
         this.rewardManager = RewardManager.getInstance(plugin);
+        this.database = plugin.getDatabase();
     }
 
     @Override
@@ -38,7 +39,7 @@ public class RewardCommandExecutor implements CommandExecutor {
                 String today = sdf.format(new Date());
 
                 // SQLiteから最後に受け取った日付を取得する
-                String lastReceived = plugin.Database().getLastReceivedDate(player.getUniqueId());
+                String lastReceived = database.getLastReceivedDate(player.getUniqueId());
                 if (lastReceived == null) {
                     lastReceived = "Not Found";
                 }
