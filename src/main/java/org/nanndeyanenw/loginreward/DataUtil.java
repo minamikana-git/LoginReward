@@ -58,7 +58,7 @@ public class DataUtil {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        file = new File(plugin.getDataFolder(), "playerdata.yml");
+        file = new File(plugin.getDataFolder(), "playerdata.db");
 
         if (!file.exists()) {
             try {
@@ -67,7 +67,6 @@ public class DataUtil {
                 e.printStackTrace();
             }
         }
-        config = YamlConfiguration.loadConfiguration(file);
     }
 
     public static void set(String path, Object value) {
@@ -79,6 +78,7 @@ public class DataUtil {
     }
 
     public boolean contains(String path) {
+
         return config.contains(path);
     }
 
@@ -99,6 +99,5 @@ public class DataUtil {
     public static ConfigurationSection getConfigurationSection(String path) {
         return config.getConfigurationSection(path);
     }
-
 
 }

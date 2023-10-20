@@ -13,6 +13,8 @@ public class RewardCommandExecutor implements CommandExecutor {
     private final RewardManager rewardManager;
     private final LoginReward plugin;
 
+    private Database database;
+
     public RewardCommandExecutor(LoginReward plugin) {
         this.plugin = plugin;
         this.rewardManager = RewardManager.getInstance(plugin);
@@ -22,6 +24,7 @@ public class RewardCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
+
             // 新しいコマンド "debugdate" を追加
             if (cmd.getName().equalsIgnoreCase("debugdate")) {
                 if (!player.hasPermission("loginreward.debugdate")){
@@ -33,7 +36,12 @@ public class RewardCommandExecutor implements CommandExecutor {
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String today = sdf.format(new Date());
-                String lastReceived = plugin.getPlayerDataConfig().getString(player.getUniqueId().toString() + ".lastReceived", "Not Found");
+
+                // SQLiteから最後に受け取った日付を取得する
+                String lastReceived = plugin.Database().getLastReceivedDate(player.getUniqueId());
+                if (lastReceived == null) {
+                    lastReceived = "Not Found";
+                }
 
                 player.sendMessage("今日の日付: " + today);
                 player.sendMessage("最後に受け取った日付: " + lastReceived);

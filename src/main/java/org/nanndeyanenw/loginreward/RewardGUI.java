@@ -13,6 +13,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,6 +22,8 @@ import java.util.Date;
 
 public class RewardGUI implements Listener {
     private SaveData saveDataInstance;
+
+    private Connection connection;
     public FileConfiguration getPlayerDataConfig() {
         return this.playerData;
     }
@@ -32,56 +36,109 @@ public class RewardGUI implements Listener {
         this.saveDataInstance = saveData;
         this.playerData = plugin.getPlayerDataConfig();
         this.plugin = plugin;
+        connect();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }
     }
 
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        if (!hasReceivedRewardToday(player)) {
-            open(player);
-            // ログイン日数をインクリメント
-            saveDataInstance.incrementLoginDays(player);
-            // dataConfigに変更があったので保存
-            saveDataInstance.saveDataConfig();
+    private void connect() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                return;
+            }
+
+            synchronized (this) {
+                if (connection != null && !connection.isClosed()) {
+                    return;
+                }
+
+                Class.forName("org.sqlite.JDBC");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "playerdata.db");
+
+                // 必要なテーブルを初期化（存在しない場合）
+                Statement statement = connection.createStatement();
+                String sql = "CREATE TABLE IF NOT EXISTS playerdata (uuid STRING, lastReceived STRING, daysLoggedIn INT)";
+                statement.execute(sql);
+                statement.close();
+            }
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
         }
     }
 
+    public void closeConnection() {
+            try {
+                if (connection != null && !connection.isClosed()) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+    }
+    public int getDaysLoggedIn(Player player) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT daysLoggedIn FROM playerdata WHERE uuid = ?");
+            ps.setString(1, player.getUniqueId().toString());
+            ResultSet resultSet = ps.executeQuery();
 
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) throws ParseException {
-        if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
-            event.setCancelled(true); // インベントリ内の移動をキャンセル
+            if (resultSet.next()) {
+                return resultSet.getInt("daysLoggedIn");
+            } else {
+                // デフォルト値
+                return 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 1; // エラー時のデフォルト値
+        }
+    }
 
-            if (event.getCurrentItem() != null) {
-                Material itemType = event.getCurrentItem().getType();
-                if (itemType == Material.GOLD_INGOT) {
-                    Player player = (Player) event.getWhoClicked();
-                    if (!hasReceivedRewardToday(player)) {
-                        handleRewardForPlayer(player);
+        @EventHandler
+        public void onPlayerJoin (PlayerJoinEvent event){
+            Player player = event.getPlayer();
+            if (!hasReceivedRewardToday(player)) {
+                open(player);
+                // ログイン日数をインクリメント
+                saveDataInstance.incrementLoginDays(player);
+                // dataConfigに変更があったので保存
+                saveDataInstance.saveDataConfig();
+            }
+        }
 
-                        // ここでバリアブロックに更新します。
-                        event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
-                    } else {
-                        player.closeInventory();
-                        player.sendMessage("今日の報酬はすでに受け取っています。");
+
+        @EventHandler
+        public void onInventoryClick (InventoryClickEvent event) throws ParseException {
+            if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
+                event.setCancelled(true); // インベントリ内の移動をキャンセル
+
+                if (event.getCurrentItem() != null) {
+                    Material itemType = event.getCurrentItem().getType();
+                    if (itemType == Material.GOLD_INGOT) {
+                        Player player = (Player) event.getWhoClicked();
+                        if (!hasReceivedRewardToday(player)) {
+                            handleRewardForPlayer(player);
+
+                            // ここでバリアブロックに更新します。
+                            event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
+                        } else {
+                            player.closeInventory();
+                            player.sendMessage("今日の報酬はすでに受け取っています。");
+                        }
                     }
                 }
             }
         }
-    }
 
-    private boolean hasReceivedRewardToday(Player player) {
-        String uniqueId = player.getUniqueId().toString();
-        String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String today = sdf.format(new Date());
+        private boolean hasReceivedRewardToday (Player player){
+            String uniqueId = player.getUniqueId().toString();
+            String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String today = sdf.format(new Date());
 
-        return today.equals(lastReceived);
-    }
+            return today.equals(lastReceived);
+        }
 
         private double giveReward (Player player){
             int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
@@ -118,7 +175,7 @@ public class RewardGUI implements Listener {
         }
 
 
-    private void handleRewardForPlayer (Player player) throws ParseException {
+    private void handleRewardForPlayer(Player player) throws ParseException {
         int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
         double rewardAmount = 0;
         rewardAmount = giveReward(player);
@@ -138,16 +195,35 @@ public class RewardGUI implements Listener {
         }
 
         cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
+
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE playerdata SET daysLoggedIn = ? WHERE uuid = ?");
+            ps.setInt(1, daysLoggedIn);
+            ps.setString(2, player.getUniqueId().toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE playerdata SET lastReceived = ? WHERE uuid = ?");
+            ps.setString(1, sdf.format(cal.getTime()));
+            ps.setString(2, player.getUniqueId().toString());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 既存のコードを継続
         playerData.set(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime())); // 今日の日付を文字列として記録
-
         playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
-        plugin.savePlayerDataConfig();
 
-        //GUIを再度開くことで、更新を反映させる
-        player.closeInventory(); //一度閉じる
-        open(player); //GUIを開く。
+        // GUIを再度開くことで、更新を反映させる
+        player.closeInventory(); // 一度閉じる
+        open(player); // GUIを開く
     }
-
 
         public void open (Player player){
             player.openInventory(createGuiInventory(player));
@@ -183,5 +259,6 @@ public class RewardGUI implements Listener {
             item.setItemMeta(meta);
             return item;
         }
+
 }
 

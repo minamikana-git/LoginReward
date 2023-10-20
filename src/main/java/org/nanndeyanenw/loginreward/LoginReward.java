@@ -4,65 +4,122 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.*;
-
+import java.sql.*;
+import java.sql.Connection;
 public class LoginReward extends JavaPlugin implements Listener {
-    private File dataFile;
-
-    private YamlConfiguration dataConfig;
-
+    private Database database;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
     public RewardManager rewardManager;
-    private FileConfiguration playerData;
-
     private static LoginReward instance;
-
-    private SaveData saveData;
-    public LoginReward() {
+    public LoginReward(String dbFilename) {
+       this.database = new Database(dbFilename); 
+       initializeTable();
     }
-
-    @Override
-    public void onEnable() {
-        loadData(); //先にデータをロード
-        instance = this;// SaveDataのインスタンスを作成
-        saveData = new SaveData(this, dataConfig, dataFile);
-        rewardGUI = new RewardGUI(this, saveData);
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
-        this.rewardManager = RewardManager.getInstance(this);
-        if (rewardManager == null) {
-            getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
+    private void initializeTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS players ("
+                + "uuid TEXT PRIMARY KEY,"
+                + "days INTEGER,"
+                + "lastLoginDate TEXT"
+                + ");";
+        try (Connection conn = database.connect();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
+    public void onEnable() {
+        Bukkit.getServer().getPluginManager().registerEvents(this, this);{
+
+            getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
+            getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
+            this.rewardManager = RewardManager.getInstance(this);
+            if (rewardManager == null) {
+                getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
+                getServer().getPluginManager().disablePlugin(this);
+
+            }
+        }
+    }
+
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        int currentDays = getLoginDays(uuid);
+        int updatedDays = currentDays + 1;
+
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(date);
+
+        savePlayerData(uuid, updatedDays, formattedDate);
+    }
+
+    private int getLoginDays(UUID uuid) {
+        String sql = "SELECT days FROM players WHERE uuid = ?";
+        try (Connection conn = database.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, uuid.toString());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("days");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private void savePlayerData(UUID uuid, int days, String lastLoginDate) {
+        String sql = "INSERT OR REPLACE INTO players (uuid, days, lastLoginDate) VALUES (?, ?, ?)";
+        try (Connection conn = database.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, uuid.toString());
+            pstmt.setInt(2, days);
+            pstmt.setString(3, lastLoginDate);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void onDisable() {
         instance = null;
         if (rewardManager != null) {
-            SaveData.saveData();
+        closeConnection();
         }
     }
-
+    public void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         if (command.getName().equalsIgnoreCase("loginreward")) {
@@ -76,18 +133,6 @@ public class LoginReward extends JavaPlugin implements Listener {
             return true;
         }
         return true;
-    }
-
-
-    public void savePlayerDataConfig() {
-        if (dataConfig == null || dataFile == null) { //nullチェック
-            return;
-        }
-        try {
-            dataConfig.save(dataFile);
-        } catch (IOException ex) {
-            this.getLogger().severe("設定ファイルを保存できませんでした。" + dataFile);
-        }
     }
 
     //ログインボーナスのインベントリを開くメソッド
@@ -119,21 +164,6 @@ public class LoginReward extends JavaPlugin implements Listener {
         return stack;
     }
 
-    public FileConfiguration getPlayerDataConfig() {
-        return this.dataConfig;
-    }
-
-    public void loadData() {
-        dataFile = new File(getDataFolder(), "playerdata.yml");
-        if (!dataFile.exists()) {
-            try {
-                dataFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-    }
     public static LoginReward getInstance() {
 
         return instance;
@@ -143,5 +173,4 @@ public class LoginReward extends JavaPlugin implements Listener {
         return this.rewardGUI;
     }
 }
-
 
