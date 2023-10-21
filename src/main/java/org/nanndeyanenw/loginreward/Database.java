@@ -1,6 +1,5 @@
 package org.nanndeyanenw.loginreward;
 
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -10,17 +9,17 @@ import java.util.UUID;
 public class Database {
     private Connection connection;
     private String url;
-    private final String dbPath;
-    public Database(String dbPath) {
-        this.dbPath = dbPath;
-        connect();
-    }
+    public String dbPath;
 
     public Database(String filename) {
+        this.dbPath = filename;
         this.url = "jdbc:sqlite:" + filename;
+        try {
+            connect();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
-
-
 
     public Connection connect() throws SQLException {
         if (connection == null || connection.isClosed()) {
@@ -110,6 +109,7 @@ public class Database {
                 playerDataMap.put("uuid", resultSet.getString("uuid"));
                 playerDataMap.put("lastReceived", resultSet.getString("lastReceived"));
                 playerDataMap.put("daysLoggedIn", resultSet.getInt("daysLoggedIn"));
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
