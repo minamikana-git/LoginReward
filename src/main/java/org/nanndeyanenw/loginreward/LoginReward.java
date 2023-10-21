@@ -23,6 +23,8 @@ import java.util.*;
 import java.sql.*;
 import java.sql.Connection;
 public class LoginReward extends JavaPlugin implements Listener {
+
+
     private Database database;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
@@ -30,8 +32,8 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardManager rewardManager;
     private static LoginReward instance;
     public LoginReward(String dbFilename) {
-       this.database = new Database(dbFilename); 
-       initializeTable();
+        this.database = new Database(dbFilename);
+        initializeTable();
     }
     private void initializeTable() {
         String sql = "CREATE TABLE IF NOT EXISTS players ("
@@ -184,7 +186,5 @@ public class LoginReward extends JavaPlugin implements Listener {
         return this.rewardGUI;
     }
 
-    public Database getDatabase() {
-        return this.database;
-    }
+
 }
