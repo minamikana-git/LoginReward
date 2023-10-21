@@ -20,12 +20,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 public class RewardGUI implements Listener {
     private SaveData saveData;
-
+    private int daysLoggedIn;
     private Database databaseInstance = new Database("player_data.db");
-    private FileConfiguration playerData;
+    private Map<String, Object> playerDataMap;
 
 
     private Connection connection;
@@ -39,12 +40,15 @@ public class RewardGUI implements Listener {
 
     public RewardGUI(LoginReward plugin, SaveData saveData) {
         this.saveData = saveData;
-        this.playerData = databaseInstance.getPlayerData();
         this.plugin = plugin;
         connect();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }
+    }
+
+    public void loadPlayerData(Player player) {
+        this.playerDataMap = databaseInstance.getPlayerData(player.getUniqueId());
     }
 
 
@@ -138,7 +142,7 @@ public class RewardGUI implements Listener {
 
         private boolean hasReceivedRewardToday (Player player){
             String uniqueId = player.getUniqueId().toString();
-            String lastReceived = playerData.getString(uniqueId + ".lastReceived", "");
+            String lastReceived = (String) playerDataMap.get(uniqueId + ".lastReceived");
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String today = sdf.format(new Date());
 
@@ -146,7 +150,7 @@ public class RewardGUI implements Listener {
         }
 
         private double giveReward (Player player){
-            int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+            int daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
             double rewardAmount;
             switch (daysLoggedIn) {
                 case 1:
@@ -181,13 +185,13 @@ public class RewardGUI implements Listener {
 
 
     private void handleRewardForPlayer(Player player) throws ParseException {
-        int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+        daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1);// デフォルトは1日目
         double rewardAmount = 0;
         rewardAmount = giveReward(player);
         player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String lastReceivedDateStr = playerData.getString(player.getUniqueId().toString() + ".lastReceived");
+        String lastReceivedDateStr = (String) playerDataMap.get(player.getUniqueId().toString() + ".lastReceived");
         Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
 
         Calendar cal = Calendar.getInstance();
@@ -222,8 +226,10 @@ public class RewardGUI implements Listener {
         }
 
         // 既存のコードを継続
-        playerData.set(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime())); // 今日の日付を文字列として記録
-        playerData.set(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+        playerDataMap.put(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime()));
+        // 今日の日付を文字列として記録
+        playerDataMap.put(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+
 
         // GUIを再度開くことで、更新を反映させる
         player.closeInventory(); // 一度閉じる
@@ -236,7 +242,7 @@ public class RewardGUI implements Listener {
 
         private Inventory createGuiInventory (Player player){
             Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス");
-            int daysLoggedIn = playerData.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 1);
+            daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1);
             Bukkit.getLogger().info("Player " + player.getName() + " has logged in for " + daysLoggedIn + " days.");
 
             for (int i = 0; i < 9; i++) {
@@ -264,6 +270,7 @@ public class RewardGUI implements Listener {
             item.setItemMeta(meta);
             return item;
         }
+
 
 }
 
