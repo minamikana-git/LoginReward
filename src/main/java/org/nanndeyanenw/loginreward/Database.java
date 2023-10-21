@@ -1,19 +1,24 @@
 package org.nanndeyanenw.loginreward;
 
 
+// インポート部分
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+// データベースクラスの定義
 public class Database {
-    private Connection connection;
-    private String url;
-    public String dbPath;
+    private Connection connection; // データベースへの接続
+    private String url; // データベース接続URL
+    public String dbPath; // データベースのパス
 
+    // コンストラクタ
     public Database(String filename) {
-        this.dbPath = filename;
-        this.url = "jdbc:sqlite:" + filename;
+        this.dbPath = filename; // ファイル名の設定
+        this.url = "jdbc:sqlite:" + filename; // 接続URLの設定
+
+        // データベースに接続
         try {
             connect();
         } catch (SQLException e) {
@@ -21,6 +26,7 @@ public class Database {
         }
     }
 
+    // データベース接続メソッド
     public Connection connect() throws SQLException {
         if (connection == null || connection.isClosed()) {
             connection = DriverManager.getConnection(url);
@@ -28,12 +34,14 @@ public class Database {
         return connection;
     }
 
+    // データベース切断メソッド
     public void disconnect() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             connection.close();
         }
     }
 
+    // テーブル初期化メソッド
     public void initializeTable() {
         String sql = "CREATE TABLE IF NOT EXISTS player_data ("
                 + "uuid TEXT PRIMARY KEY,"
@@ -48,6 +56,7 @@ public class Database {
         }
     }
 
+    // プレイヤーデータ保存メソッド
     public void savePlayerData(UUID uuid, int days, String lastLoginDate) {
         String sql = "INSERT OR REPLACE INTO player_data (uuid, days, lastLoginDate) VALUES (?, ?, ?)";
         try (Connection conn = connect();
@@ -61,6 +70,7 @@ public class Database {
         }
     }
 
+    // プレイヤーのログイン日数を取得するメソッド
     public int getLoginDays(UUID uuid) {
         String sql = "SELECT days FROM player_data WHERE uuid = ?";
         try (Connection conn = connect();
@@ -76,6 +86,7 @@ public class Database {
         return 0;
     }
 
+    // 最後に受け取った日を取得するメソッド
     public String getLastReceivedDate(UUID uniqueId) {
         String lastReceivedDate = null;
 
@@ -97,6 +108,7 @@ public class Database {
         return lastReceivedDate;
     }
 
+    // プレイヤーデータを取得するメソッド
     public Map<String, Object> getPlayerData(UUID playerUUID) {
         Map<String, Object> playerDataMap = new HashMap<>();
 
@@ -117,5 +129,4 @@ public class Database {
 
         return playerDataMap;
     }
-
 }
