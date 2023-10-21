@@ -185,6 +185,9 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI(){
         return this.rewardGUI;
     }
+    public Database getDatabase() {
+        return this.database;
+    }
 
 
 }
