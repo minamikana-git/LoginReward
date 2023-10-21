@@ -25,6 +25,7 @@ import java.sql.Connection;
 public class LoginReward extends JavaPlugin implements Listener {
 
 
+
     private Database database;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
@@ -36,7 +37,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         initializeTable();
     }
     private void initializeTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS players ("
+        String sql = "CREATE TABLE IF NOT EXISTS player_data ("
                 + "uuid TEXT PRIMARY KEY,"
                 + "days INTEGER,"
                 + "lastLoginDate TEXT"
