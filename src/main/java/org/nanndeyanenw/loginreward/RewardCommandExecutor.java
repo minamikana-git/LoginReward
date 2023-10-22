@@ -11,32 +11,29 @@ import java.util.Date;
 public class RewardCommandExecutor implements CommandExecutor {
 
     private final RewardManager rewardManager;
-    private LoginReward plugin = new LoginReward();
+
     private final PlayerDataHandler playerDataHandler;
 
-    DataUtil dataUtilInstance = plugin.getDataUtil;
+    private final LoginReward plugin;
+    private final DataUtil dataUtilInstance;
 
     public RewardCommandExecutor(LoginReward plugin) {
         this.plugin = plugin;
         this.rewardManager = RewardManager.getInstance(plugin);
         this.playerDataHandler = plugin.getPlayerDataHandler();
+        this.dataUtilInstance = plugin.getDataUtil;  // ここで初期化する
     }
 
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            if (!rewardManager.hasClaimedReward(player)) {
-                // GUIを表示
-                new RewardGUI(plugin, dataUtilInstance).open(player);
-            } else {
-                player.sendMessage("You have already claimed your reward today!");
-            }
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("§cこのコマンドはプレイヤーからのみ実行できます。");
+            return true;
         }
+        Player player = (Player) sender;
 
-             Player player = (Player) sender;
-
+        if (cmd.getName().equalsIgnoreCase("loginreward")) {
             if (cmd.getName().equalsIgnoreCase("debugdate")) {
                 player.sendMessage("§a時刻をアップデートしました。");
 
@@ -49,18 +46,16 @@ public class RewardCommandExecutor implements CommandExecutor {
                 player.sendMessage("今日の日付: " + today);
                 player.sendMessage("最後に受け取った日付: " + lastReceived);
                 return true;
+            } else if (!rewardManager.hasClaimedReward(player)) {
+                // GUIを表示
+                plugin.getRewardGUI().open(player);
+            } else {
+                player.sendMessage("今日の報酬はすでに受け取っています。");
             }
-
-        if (!rewardManager.hasClaimedReward(player)) {
-            // GUIを表示
-            plugin.getRewardGUI().open(player);
-        } else {
-            player.sendMessage("今日の報酬はすでに受け取っています。");
         }
 
         return true;
-
-
     }
 }
+
 

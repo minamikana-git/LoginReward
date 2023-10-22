@@ -32,8 +32,6 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardManager rewardManager;
     private static LoginReward instance;
 
-    public LoginReward() {
-    }
 
     @Override
     public void onEnable() {
@@ -48,9 +46,9 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
-            this.getLogger().info("Initializing RewardGUI...");
+
             this.rewardGUI = new RewardGUI(this, dataUtilInstance);
-            this.getLogger().info("RewardGUI initialized.");
+
        }
     }
     public PlayerDataHandler getPlayerDataHandler() {
