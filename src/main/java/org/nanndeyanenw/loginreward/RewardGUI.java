@@ -32,19 +32,17 @@ public class RewardGUI implements Listener {
     private Map<String, Object> playerDataMap;
 
 
-    private Connection connection;
 
 
-    public void saveDataConfig(){
-        saveData.saveData();
-    }
+
+
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
-    public RewardGUI(LoginReward plugin, SaveData saveData) {
-        this.saveData = saveData;
+    public RewardGUI(LoginReward plugin, DataUtil dataUtil) {
+
         this.plugin = plugin;
-        connect();
+
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }

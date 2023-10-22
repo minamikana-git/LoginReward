@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,7 +24,7 @@ import java.util.*;
 
 public class LoginReward extends JavaPlugin implements Listener {
 
-
+    saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
 
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
@@ -51,6 +52,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
 
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -67,7 +69,8 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     private int getLoginDays(UUID uuid) {
-
+        FileConfiguration config = getConfig();
+        return config.getInt(uuid + ".days", 0);  // デフォルト値は0
     }
 
     private void savePlayerData(UUID uuid, int days, String lastLoginDate) {
@@ -142,7 +145,6 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI() {
         return this.rewardGUI;
     }
-
 
 }
 
