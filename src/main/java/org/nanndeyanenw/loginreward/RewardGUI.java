@@ -120,14 +120,16 @@ public class RewardGUI implements Listener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
 
-        if (lastReceived == null || lastReceived.isEmpty()) {
-            // 例として、今日の日付をデフォルト値として設定
-            lastReceived = today;
-            playerDataMap.put(pathBase, lastReceived);
-            // playerDataHandler.saveConfig(); ここで保存のメソッドが必要かもしれません。
+        if (lastReceived == null || lastReceived.isEmpty() || !today.equals(lastReceived)) {
+            // プレイヤーが今日報酬を受け取っていない場合
+            if (lastReceived == null || lastReceived.isEmpty()) {
+                playerDataMap.put(pathBase, today);
+                // 外部にデータを保存
+                playerDataHandler.saveConfig();
+            }
+            return false; // 今日の報酬は受け取っていない
         }
-
-        return today.equals(lastReceived);
+        return true; // 今日の報酬は既に受け取っている
         }
 
         private double giveReward (Player player){
