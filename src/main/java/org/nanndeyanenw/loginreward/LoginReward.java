@@ -33,7 +33,6 @@ public class LoginReward extends JavaPlugin implements Listener {
     private static LoginReward instance;
 
     public LoginReward() {
-        instance = this;
     }
 
     @Override
@@ -45,7 +44,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
-        this.rewardManager = RewardManager.getInstance(this);
+
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
