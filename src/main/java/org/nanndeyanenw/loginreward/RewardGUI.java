@@ -167,14 +167,17 @@ public class RewardGUI implements Listener {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Date yesterday = cal.getTime();
-
         if (lastReceivedDate.before(yesterday)) {
             daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         }
-
         cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
+
         playerDataMap.put(pathBase + ".lastReceived", sdf.format(cal.getTime()));
         playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
+
+        config.set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
+        config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
+
         playerDataHandler.saveConfig();
 
         // GUIを再度開くことで、更新を反映させる
