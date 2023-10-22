@@ -35,11 +35,6 @@ public class LoginReward extends JavaPlugin implements Listener {
         instance = this;
     }
 
-
-
-    private PlayerDataHandler playerDataHandler;
-    private RewardManager rewardManager;
-
     @Override
     public void onEnable() {
         saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
@@ -59,10 +54,6 @@ public class LoginReward extends JavaPlugin implements Listener {
     public PlayerDataHandler getPlayerDataHandler() {
         return playerDataHandler;
     }
-
-
-
-
 
 
     @EventHandler
