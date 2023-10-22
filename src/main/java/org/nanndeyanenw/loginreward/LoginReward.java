@@ -24,6 +24,7 @@ import java.util.*;
 
 public class LoginReward extends JavaPlugin implements Listener {
 
+    private DataUtil dataUtilInstance;
 
     public DataUtil getDataUtil;
     private PlayerDataHandler playerDataHandler;
@@ -32,16 +33,16 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardManager rewardManager;
     private static LoginReward instance;
 
-
     @Override
     public void onEnable() {
-        saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
+        saveDefaultConfig();// config.ymlが存在しない場合、デフォルトをコピー
+        dataUtilInstance = new DataUtil(this);
+        getServer().getPluginManager().registerEvents(new RewardGUI(this, dataUtilInstance), this);
+        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
+        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
         playerDataHandler = new PlayerDataHandler(getDataFolder(), "config.yml");
         DataUtil dataUtilInstance = new DataUtil(this);
-        Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
 
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
@@ -50,7 +51,7 @@ public class LoginReward extends JavaPlugin implements Listener {
             this.rewardGUI = new RewardGUI(this, dataUtilInstance);
         }
 
-       }
+    }
 
     public PlayerDataHandler getPlayerDataHandler() {
         return playerDataHandler;
@@ -155,8 +156,3 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
 }
-
-
-
-
-

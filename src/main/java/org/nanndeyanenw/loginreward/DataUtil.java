@@ -10,6 +10,7 @@ import java.io.IOException;
 
 public class DataUtil {
 
+
     private static FileConfiguration config;
     private static File file;
 
@@ -21,7 +22,7 @@ public class DataUtil {
         DataUtil.file = file;
     }
 
-
+public DataUtil dataUtil;
     public static int getDaysLoggedIn(Player player) {
         return dataConfig.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 0);
     }

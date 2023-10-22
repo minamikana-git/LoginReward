@@ -33,17 +33,19 @@ public class RewardGUI implements Listener {
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
+
     public RewardGUI(LoginReward plugin, DataUtil dataUtil) {
         this.plugin = plugin;
-        this.playerDataMap = new HashMap<>(); // これを追加
-
+        this.playerDataHandler = new PlayerDataHandler(dataUtil); // ここを追加
+        this.playerDataMap = new HashMap<>();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }
-        }
+    }
 
 
     public void loadPlayerData(Player player) {
+
         FileConfiguration config = playerDataHandler.getConfig();
         String pathBase = player.getUniqueId().toString();
         if (!config.contains(pathBase)) {
@@ -65,7 +67,7 @@ public class RewardGUI implements Listener {
             open(player);
             // ログイン日数をインクリメント
             incrementLoginDays(player);
-            // ymlに変更があったので保存
+            // ymlに変更があったら保存
             playerDataHandler.saveConfig();
         }
     }
@@ -83,9 +85,10 @@ public class RewardGUI implements Listener {
 
         @EventHandler(priority = EventPriority.HIGHEST)
         public void onInventoryClick (InventoryClickEvent event) throws ParseException {
-            if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
-                event.setCancelled(true); // インベントリ内の移動をキャンセル
-
+            if (event.getView().getTitle().equals("ログインボーナス")) {
+                event.setCancelled(true);
+                Player player = (Player) event.getWhoClicked();
+            }
                 if (event.getCurrentItem() != null) {
                     Material itemType = event.getCurrentItem().getType();
                     if (itemType == Material.GOLD_INGOT) {
@@ -102,7 +105,7 @@ public class RewardGUI implements Listener {
                     }
                 }
             }
-        }
+
 
         private boolean hasReceivedRewardToday (Player player){
             String uniqueId = player.getUniqueId().toString();
