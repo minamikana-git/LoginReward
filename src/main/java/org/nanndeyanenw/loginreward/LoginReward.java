@@ -38,6 +38,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         saveDefaultConfig();// config.ymlが存在しない場合、デフォルトをコピー
         dataUtilInstance = new DataUtil(this);
         getServer().getPluginManager().registerEvents(new RewardGUI(this, dataUtilInstance), this);
+        getCommand("setdebugdate").setExecutor(new RewardCommandExecutor(this));
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);

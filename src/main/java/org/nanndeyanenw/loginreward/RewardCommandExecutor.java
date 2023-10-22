@@ -28,13 +28,16 @@ public class RewardCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("§cこのコマンドはプレイヤーからのみ実行できます。");
-            return true;
+        if (cmd.getName().equalsIgnoreCase("loginreward")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("§cこのコマンドはプレイヤーからのみ実行できます。");
+                return true;
+            }
         }
         Player player = (Player) sender;
+
         if (cmd.getName().equalsIgnoreCase("setDebugDate")) {
-            if (!player.hasPermission("loginreward.setdebugdate")){
+            if (!player.hasPermission("loginreward.setdebugdate")) {
                 player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
                 return true;
             }
@@ -54,41 +57,42 @@ public class RewardCommandExecutor implements CommandExecutor {
             return true;
         }
 
-
-        if (cmd.getName().equalsIgnoreCase("loginreward")) {
-            if (cmd.getName().equalsIgnoreCase("debugdate")) {
-                if (!player.hasPermission("loginreward.debugdate")){
-                    player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
-                    return true;
-                }
-                player.sendMessage("§a時刻をアップデートしました。");
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String today = sdf.format(new Date());
-
-                // ymlから最後に受け取った日付を取得
-                String lastReceived = playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
-
-                player.sendMessage("今日の日付: " + today);
-                player.sendMessage("最後に受け取った日付: " + lastReceived);
+        if (cmd.getName().equalsIgnoreCase("debugdate")) {
+            if (!player.hasPermission("loginreward.debugdate")) {
+                player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
                 return true;
-            } else if (!rewardManager.hasClaimedReward(player)) {
-                // GUIを表示
-                plugin.getRewardGUI().open(player);
-            } else {
-                player.sendMessage("今日の報酬はすでに受け取っています。");
             }
+            player.sendMessage("§a時刻をアップデートしました。");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String today = sdf.format(new Date());
+
+            // ymlから最後に受け取った日付を取得
+
+            String lastReceived = playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
+
+            player.sendMessage("今日の日付: " + today);
+            player.sendMessage("最後に受け取った日付: " + lastReceived);
+            return true;
+        } else if (!rewardManager.hasClaimedReward(player)) {
+            // GUIを表示
+            plugin.getRewardGUI().open(player);
+        } else {
+            player.sendMessage("今日の報酬はすでに受け取っています。");
         }
 
         return true;
     }
+
     private Date getCurrentDate() {
-        if(debugDate != null) {
+        if (debugDate != null) {
             return debugDate;
         }
         return new Date();
     }
-
 }
+
+
+
 
 
