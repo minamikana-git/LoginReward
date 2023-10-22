@@ -58,7 +58,7 @@ public class DataUtil {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        file = new File(plugin.getDataFolder(), "player_data.db");
+        file = new File(plugin.getDataFolder(), "player_data.yml");
 
         if (!file.exists()) {
             try {
@@ -67,6 +67,7 @@ public class DataUtil {
                 e.printStackTrace();
             }
         }
+
     }
 
     public static void set(String path, Object value) {

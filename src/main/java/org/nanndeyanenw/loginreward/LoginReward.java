@@ -25,17 +25,17 @@ import java.sql.Connection;
 public class LoginReward extends JavaPlugin implements Listener {
 
 
-
     private Database database;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
     private Connection connection;
     public RewardManager rewardManager;
     private static LoginReward instance;
-    public LoginReward(String dbFilename) {
-        this.database = new Database(dbFilename);
-        initializeTable();
+
+    public LoginReward() {
+        instance = this;
     }
+
     private void initializeTable() {
         String sql = "CREATE TABLE IF NOT EXISTS player_data ("
                 + "uuid TEXT PRIMARY KEY,"
@@ -49,7 +49,11 @@ public class LoginReward extends JavaPlugin implements Listener {
             e.printStackTrace();
         }
     }
-    public void onEnable() {
+
+    public void onEnable(String dbFilename) {
+        this.rewardManager =RewardManager.getInstance(this);
+        this.database = new Database(dbFilename);
+        initializeTable();
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
@@ -60,7 +64,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         } else {
             try {
                 Class.forName("org.sqlite.JDBC"); // SQLite JDBC ドライバをロード
-                connection = DriverManager.getConnection("jdbc:sqlite:" + this.getDataFolder() + File.separator + "player_data.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + this.getDataFolder() + File.separator + "player_data.yml");
             } catch (SQLException e) {
                 e.printStackTrace();
                 getLogger().severe("データベースへの接続に失敗しました。");
@@ -70,7 +74,6 @@ public class LoginReward extends JavaPlugin implements Listener {
             }
         }
     }
-
 
 
     @EventHandler
@@ -121,9 +124,10 @@ public class LoginReward extends JavaPlugin implements Listener {
     public void onDisable() {
         instance = null;
         if (rewardManager != null) {
-        closeConnection();
+            closeConnection();
         }
     }
+
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -151,8 +155,12 @@ public class LoginReward extends JavaPlugin implements Listener {
 
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
+        if (rewardManager == null) {
+            getLogger().severe("エラー：rewardManagerがnullです！");
+            return;
+        }
         Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
-        int day = rewardManager.getConsecutiveDays(player); // 連続ログイン日数を取得
+        int day = rewardManager.getConsecutiveDays(player);
 
         for (int i = 1; i <= 7; i++) {
             if (i < day) { // すでに受け取った報酬の場合
@@ -183,12 +191,13 @@ public class LoginReward extends JavaPlugin implements Listener {
         return instance;
     }
 
-    public RewardGUI getRewardGUI(){
+    public RewardGUI getRewardGUI() {
         return this.rewardGUI;
     }
+
     public Database getDatabase() {
         return this.database;
     }
-
-
 }
+
+

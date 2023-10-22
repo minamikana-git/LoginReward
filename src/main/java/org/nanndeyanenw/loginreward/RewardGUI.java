@@ -4,7 +4,6 @@ package org.nanndeyanenw.loginreward;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,12 +19,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RewardGUI implements Listener {
     private SaveData saveData;
     private int daysLoggedIn;
-    private Database databaseInstance = new Database("player_data.db");
+    private Database databaseInstance = new Database("player_data.yml");
     private Map<String, Object> playerDataMap;
 
 
@@ -49,6 +49,11 @@ public class RewardGUI implements Listener {
 
     public void loadPlayerData(Player player) {
         this.playerDataMap = databaseInstance.getPlayerData(player.getUniqueId());
+        if (this.playerDataMap == null) {
+            this.playerDataMap = new HashMap<>();
+            this.playerDataMap.put(player.getUniqueId().toString() + ".lastReceived", "");
+            this.playerDataMap.put(player.getUniqueId().toString() + ".daysLoggedIn", 1);
+        }
     }
 
 
@@ -64,7 +69,7 @@ public class RewardGUI implements Listener {
                 }
 
                 Class.forName("org.sqlite.JDBC");
-                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
+                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.yml");
 
                 // 必要なテーブルを初期化（存在しない場合）
                 Statement statement = connection.createStatement();
@@ -207,7 +212,7 @@ public class RewardGUI implements Listener {
 
 
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE playerdata SET daysLoggedIn = ? WHERE uuid = ?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE player_data SET daysLoggedIn = ? WHERE uuid = ?");
             ps.setInt(1, daysLoggedIn);
             ps.setString(2, player.getUniqueId().toString());
             ps.executeUpdate();

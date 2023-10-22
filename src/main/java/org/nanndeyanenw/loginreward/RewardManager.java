@@ -1,10 +1,12 @@
 package org.nanndeyanenw.loginreward;
 
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -23,6 +25,10 @@ public class RewardManager {
 
     private LoginReward plugin;
 
+    private File dataFile;
+    private YamlConfiguration dataConfig;
+
+
     public Reward getLoginReward() {
         return loginReward;
     }
@@ -31,40 +37,42 @@ public class RewardManager {
     private Economy econ;
 
     private RewardManager(LoginReward plugin) {
-        this.plugin = plugin;
+            this.plugin = plugin;
+            setupYAML();
+            if (!setupEconomy()) {
+                plugin.getLogger().severe("Vault not found! Disabling plugin...");
+                plugin.getServer().getPluginManager().disablePlugin(plugin);
+            }
 
-        this.dataUtil = new DataUtil(plugin);
-        this.plugin = plugin;
-        if (!setupEconomy()) {
-            plugin.getLogger().severe("Vault not found! Disabling plugin...");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
-            establishConnection();
+    }
+
+
+    private void setupYAML() {
+        dataFile = new File(plugin.getDataFolder(), "player_data.yml");
+        if (!dataFile.exists()) {
+            try {
+                dataFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+    }
+
+    private void saveYAML() {
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void establishConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                return;
-            }
-
-            // ここでは適切なデータベースの場所と名前を設定する必要があります
-            Class.forName("RewardManager");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
-
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-}
 
 
 
     public int getConsecutiveDays(Player player) {
-        if (dataUtil.contains(player.getUniqueId() + ".consecutiveDays")) {
-            return (int) dataUtil.get(player.getUniqueId() + ".consecutiveDays");
+            return dataConfig.getInt(player.getUniqueId() + ".consecutiveDays", 0);
         }
-        return 0;
-    }
 
     public Reward getRewardForConsecutiveDays(int days) {
         if (days >= 7) {
@@ -87,28 +95,18 @@ public class RewardManager {
         }
     }
 
-    public void setConsecutiveDays(Player player, int days) {
-        UUID playerUUID = player.getUniqueId();
-        String path = playerUUID.toString() + ".consecutiveDays";
-
-
-    }
+        public void setConsecutiveDays(Player player, int days) {
+            dataConfig.set(player.getUniqueId() + ".consecutiveDays", days);
+            saveYAML();
+        }
 
     public static RewardManager getInstance(LoginReward plugin) {
         if (instance == null) {
+            System.out.println("[DEBUG] Creating new instance of RewardManager...");
             instance = new RewardManager(plugin);
-            if (!instance.setupEconomy()) {
-                return null;
-            }
         }
         return instance;
     }
-
-
-
-
-
-
 
     private boolean setupEconomy() {
         if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -161,37 +159,23 @@ public class RewardManager {
     public void incrementLoginDays(Player player) {
         String playerUUID = player.getUniqueId().toString();
 
-        try {
-            // 現在のログイン日数を取得
-            PreparedStatement ps = connection.prepareStatement("SELECT login_days FROM player_data WHERE uuid = ?");
-            ps.setString(1, playerUUID);
-            ResultSet rs = ps.executeQuery();
+        // 現在のログイン日数を取得
+        int currentDays = dataConfig.getInt(playerUUID + ".login_days", 0);
 
-            int currentDays = 0;
-            if (rs.next()) {
-                currentDays = rs.getInt("login_days");
-            }
-            rs.close();
-            ps.close();
+        // ログイン日数をインクリメント
+        int updatedDays = currentDays + 1;
 
-            // ログイン日数をインクリメント
-            int updatedDays = currentDays + 1;
+        // 現在の日付を取得
+        Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateFormat.format(date);
 
-            // 現在の日付を取得
-            Date date = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String formattedDate = dateFormat.format(date);
+        // データをYAMLに保存
+        dataConfig.set(playerUUID + ".login_days", updatedDays);
+        dataConfig.set(playerUUID + ".last_login_date", formattedDate);
 
-            // データを更新または挿入
-            PreparedStatement updatePs = connection.prepareStatement("REPLACE INTO player_data (uuid, login_days, last_login_date) VALUES (?, ?, ?)");
-            updatePs.setString(1, playerUUID);
-            updatePs.setInt(2, updatedDays);
-            updatePs.setString(3, formattedDate);
-            updatePs.executeUpdate();
-            updatePs.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        // ファイルに保存
+        saveYAML();
     }
 
 }

@@ -47,7 +47,7 @@ public class SaveData {
                         if (connection != null && !connection.isClosed()) {
                             return;
                         }
-                        connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.db");
+                        connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.yml");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
