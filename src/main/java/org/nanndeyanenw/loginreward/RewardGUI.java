@@ -27,7 +27,7 @@ public class RewardGUI implements Listener {
 
     private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
-     this.playerDataHandler = new PlayerDataHandler(plugin.getDataFolder(), "player_data.yml");
+    this.playerDataHandler = new PlayerDataHandler(plugin.getDataFolder(), "player_data.yml");
 
     private Map<String, Object> playerDataMap;
 
@@ -66,16 +66,16 @@ public class RewardGUI implements Listener {
         return config.getInt(path, 1); // デフォルトは1日目
     }
 
-        @EventHandler
-        public void onPlayerJoin (PlayerJoinEvent event){
-            Player player = event.getPlayer();
-            if (!hasReceivedRewardToday(player)) {
-                open(player);
-                // ログイン日数をインクリメント
-                dataUtil.incrementLoginDays(player);
-                // dataConfigに変更があったので保存
-                saveData.saveData();
-            }
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event){
+        Player player = event.getPlayer();
+        if (!hasReceivedRewardToday(player)) {
+            open(player);
+            // ログイン日数をインクリメント
+            incrementLoginDays(player);
+            // ymlに変更があったので保存
+            playerDataHandler.saveConfig();
+        }
         }
 
 
@@ -147,32 +147,29 @@ public class RewardGUI implements Listener {
 
 
     private void handleRewardForPlayer(Player player) throws ParseException {
-        daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1);// デフォルトは1日目
-        double rewardAmount = 0;
-        rewardAmount = giveReward(player);
+        FileConfiguration config = playerDataHandler.getConfig();
+        String pathBase = player.getUniqueId().toString();
+
+        daysLoggedIn = config.getInt(pathBase + ".daysLoggedIn", 1); // デフォルトは1日目
+        double rewardAmount = giveReward(player);
         player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String lastReceivedDateStr = (String) playerDataMap.get(player.getUniqueId().toString() + ".lastReceived");
+        String lastReceivedDateStr = config.getString(pathBase + ".lastReceived");
         Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
 
         Calendar cal = Calendar.getInstance();
-
-        // この部分を追加
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Date yesterday = cal.getTime();
+
         if (lastReceivedDate.before(yesterday)) {
             daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
         }
 
         cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
-
-
-        String pathBase = player.getUniqueId().toString();
-        playerDataHandler.getConfig().set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
-        playerDataHandler.getConfig().set(pathBase + ".daysLoggedIn", daysLoggedIn);
+        config.set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
+        config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
         playerDataHandler.saveConfig();
-
 
         // GUIを再度開くことで、更新を反映させる
         player.closeInventory(); // 一度閉じる
@@ -214,6 +211,12 @@ public class RewardGUI implements Listener {
             return item;
         }
 
+
+    public void incrementLoginDays(Player player) {
+        String path = player.getUniqueId().toString() + ".daysLoggedIn";
+        int currentDays = playerDataHandler.getConfig().getInt(path, 1);
+        playerDataHandler.getConfig().set(path, currentDays + 1);
+    }
 
 }
 
