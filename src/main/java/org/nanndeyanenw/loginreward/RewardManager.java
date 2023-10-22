@@ -8,7 +8,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public class RewardManager {
 
 
     private void setupYAML() {
-        dataFile = new File(plugin.getDataFolder(), "player_data.yml");
+        dataFile = new File(plugin.getDataFolder(), "config.yml");
         if (!dataFile.exists()) {
             try {
                 dataFile.createNewFile();

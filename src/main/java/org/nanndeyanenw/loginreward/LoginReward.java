@@ -40,7 +40,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
         this.rewardManager = RewardManager.getInstance(this);
-        playerDataHandler = new PlayerDataHandler(getDataFolder(), "player_data.yml");
+        playerDataHandler = new PlayerDataHandler(getDataFolder(), "config.yml");
         DataUtil dataUtilInstance = new DataUtil(this);
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
