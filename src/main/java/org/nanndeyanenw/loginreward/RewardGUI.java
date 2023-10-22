@@ -53,11 +53,15 @@ public class RewardGUI implements Listener {
             config.set(pathBase + ".lastReceived", "");
             config.set(pathBase + ".daysLoggedIn", 1);
             playerDataHandler.saveConfig();
-        }
 
-        // playerDataMapへのロード
-        playerDataMap.put(pathBase + ".lastReceived", config.getString(pathBase + ".lastReceived"));
-        playerDataMap.put(pathBase + ".daysLoggedIn", config.getInt(pathBase + ".daysLoggedIn"));
+            // playerDataMapへのロード
+            playerDataMap.put(pathBase + ".lastReceived", "");
+            playerDataMap.put(pathBase + ".daysLoggedIn", 1);
+        } else {
+            // playerDataMapへのロード
+            playerDataMap.put(pathBase + ".lastReceived", config.getString(pathBase + ".lastReceived"));
+            playerDataMap.put(pathBase + ".daysLoggedIn", config.getInt(pathBase + ".daysLoggedIn"));
+        }
     }
 
     @EventHandler
@@ -108,13 +112,22 @@ public class RewardGUI implements Listener {
             }
 
 
-        private boolean hasReceivedRewardToday (Player player){
-            String uniqueId = player.getUniqueId().toString();
-            String lastReceived = (String) playerDataMap.get(uniqueId + ".lastReceived");
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String today = sdf.format(new Date());
+    private boolean hasReceivedRewardToday(Player player){
+        String uniqueId = player.getUniqueId().toString();
+        String pathBase = uniqueId + ".lastReceived";
 
-            return today.equals(lastReceived);
+        String lastReceived = (String) playerDataMap.get(pathBase);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+
+        if (lastReceived == null || lastReceived.isEmpty()) {
+            // 例として、今日の日付をデフォルト値として設定
+            lastReceived = today;
+            playerDataMap.put(pathBase, lastReceived);
+            // playerDataHandler.saveConfig(); ここで保存のメソッドが必要かもしれません。
+        }
+
+        return today.equals(lastReceived);
         }
 
         private double giveReward (Player player){
