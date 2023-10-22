@@ -13,22 +13,20 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.*;
-import java.sql.*;
-import java.sql.Connection;
+
 public class LoginReward extends JavaPlugin implements Listener {
 
 
 
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
-    private Connection connection;
     public RewardManager rewardManager;
     private static LoginReward instance;
 
