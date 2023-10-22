@@ -27,8 +27,6 @@ public class RewardGUI implements Listener {
 
     private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
-    this.playerDataHandler = new PlayerDataHandler(plugin.getDataFolder(), "player_data.yml");
-
     private Map<String, Object> playerDataMap;
 
 

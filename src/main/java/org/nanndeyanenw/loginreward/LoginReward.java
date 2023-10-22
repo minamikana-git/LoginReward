@@ -25,7 +25,7 @@ import java.util.*;
 public class LoginReward extends JavaPlugin implements Listener {
 
 
-
+    private PlayerDataHandler playerDataHandler;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
     public RewardManager rewardManager;
@@ -37,9 +37,14 @@ public class LoginReward extends JavaPlugin implements Listener {
 
 
 
+    private PlayerDataHandler playerDataHandler;
+    private RewardManager rewardManager;
+
+    @Override
     public void onEnable() {
         saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
-        this.rewardManager =RewardManager.getInstance(this);
+        this.rewardManager = RewardManager.getInstance(this);
+        playerDataHandler = new PlayerDataHandler(getDataFolder(), "player_data.yml");
 
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
@@ -48,9 +53,15 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
-
-            }
+        }
     }
+
+    public PlayerDataHandler getPlayerDataHandler() {
+        return playerDataHandler;
+    }
+
+
+
 
 
 

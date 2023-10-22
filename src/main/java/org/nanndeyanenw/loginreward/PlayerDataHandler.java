@@ -22,7 +22,8 @@ public class PlayerDataHandler {
             this.config = YamlConfiguration.loadConfiguration(file);
         }
 
-        public void saveConfig() {
+
+    public void saveConfig() {
             try {
                 config.save(file);
             } catch (IOException e) {

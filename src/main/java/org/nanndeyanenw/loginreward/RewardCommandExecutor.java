@@ -17,21 +17,20 @@ public class RewardCommandExecutor implements CommandExecutor {
     public RewardCommandExecutor(LoginReward plugin) {
         this.plugin = plugin;
         this.rewardManager = RewardManager.getInstance(plugin);
-        this.playerDataHandler = PlayerDataHandler.getInstance(plugin);
+        this.playerDataHandler = plugin.getPlayerDataHandler();
     }
 
 
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (!(sender instanceof Player)) {
+            return false;
+        }
 
-            // 新しいコマンド "debugdate" を追加
-            if (cmd.getName().equalsIgnoreCase("debugdate")) {
-                if (!player.hasPermission("loginreward.debugdate")){
-                    player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
-                    return true;
+        Player player = (Player) sender;
+
+        if (cmd.getName().equalsIgnoreCase("debugdate")) {
                 }
 
                 player.sendMessage("§a時刻をアップデートしました。");
@@ -48,13 +47,13 @@ public class RewardCommandExecutor implements CommandExecutor {
             }
 
         }
-        if (!rewardManager.hasClaimedReward(player)) {
-            // GUIを表示
-            plugin.getRewardGUI().open(player);
+               if (!rewardManager.hasClaimedReward(player)) {
+                // GUIを表示
+                    plugin.getRewardGUI().open      (player);
         } else {
-            player.sendMessage("今日の報酬はすでに受け取っています。");
+        player.sendMessage("今日の報酬はすでに受け取っています。");
         }
-        return false;
+        return true;
     }
 
 
