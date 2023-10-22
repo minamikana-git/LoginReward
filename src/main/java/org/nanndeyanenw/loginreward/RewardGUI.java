@@ -61,8 +61,9 @@ public class RewardGUI implements Listener {
 
 
     public int getDaysLoggedIn(Player player) {
+        FileConfiguration config = playerDataHandler.getConfig();
         String path = player.getUniqueId().toString() + ".daysLoggedIn";
-        return playerDataHandler.getConfig().getInt(path, 1);
+        return config.getInt(path, 1); // デフォルトは1日目
     }
 
         @EventHandler
