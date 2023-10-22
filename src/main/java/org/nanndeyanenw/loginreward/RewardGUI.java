@@ -28,7 +28,7 @@ public class RewardGUI implements Listener {
     private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
      this.playerDataHandler = new PlayerDataHandler(plugin.getDataFolder(), "player_data.yml");
-}
+
     private Map<String, Object> playerDataMap;
 
 
@@ -51,7 +51,7 @@ public class RewardGUI implements Listener {
     public void loadPlayerData(Player player) {
         FileConfiguration config = playerDataHandler.getConfig();
         String pathBase = player.getUniqueId().toString();
-        if (!config.contains(pathBase + ".lastReceived")) {
+        if (!config.contains(pathBase)) {
             config.set(pathBase + ".lastReceived", "");
             config.set(pathBase + ".daysLoggedIn", 1);
             playerDataHandler.saveConfig();
