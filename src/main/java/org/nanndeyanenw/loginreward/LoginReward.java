@@ -24,7 +24,7 @@ import java.util.*;
 
 public class LoginReward extends JavaPlugin implements Listener {
 
-    saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
+
 
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
@@ -38,6 +38,7 @@ public class LoginReward extends JavaPlugin implements Listener {
 
 
     public void onEnable() {
+        saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
         this.rewardManager =RewardManager.getInstance(this);
 
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -74,8 +75,12 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     private void savePlayerData(UUID uuid, int days, String lastLoginDate) {
+        FileConfiguration config = getConfig();
+        config.set(uuid + ".days", days);
+        config.set(uuid + ".lastLoginDate", lastLoginDate);
+        saveConfig();  // 変更をconfig.ymlに保存
+    }
 
-        }
 
 
 
@@ -145,6 +150,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI() {
         return this.rewardGUI;
     }
+
 
 }
 
