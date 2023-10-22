@@ -133,7 +133,10 @@ public class RewardGUI implements Listener {
         }
 
         private double giveReward (Player player){
-            int daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1); // デフォルトは1日目
+            String uniqueId = player.getUniqueId().toString();
+            int daysLoggedIn = (Integer) playerDataMap.getOrDefault(uniqueId + ".daysLoggedIn", 1); // デフォルトは1日目
+
+            // 報酬金額を計算
             double rewardAmount;
             switch (daysLoggedIn) {
                 case 1:
@@ -154,15 +157,17 @@ public class RewardGUI implements Listener {
                 case 6:
                     rewardAmount = 800;
                     break;
-                case 7:
+                default: // 7日目以降
                     rewardAmount = 1000;
-                    break;
-                default:
-                    rewardAmount = 50;
                     break;
             }
 
+            // プレイヤーに報酬を付与
             econ.depositPlayer(player, rewardAmount);
+
+            // 連続ログイン日数を1日増やし、保存
+            playerDataMap.put(uniqueId + ".daysLoggedIn", daysLoggedIn + 1);
+
             return rewardAmount; // 報酬の金額を返す
         }
 
@@ -242,6 +247,41 @@ public class RewardGUI implements Listener {
         int currentDays = playerDataHandler.getConfig().getInt(path, 1);
         playerDataHandler.getConfig().set(path, currentDays + 1);
     }
+
+    private void updateLastLoginDate(Player player){
+        String uniqueId = player.getUniqueId().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+        playerDataMap.put(uniqueId + ".lastLoginDate", today);
+    }
+
+    private void updateConsecutiveLoginDays(Player player){
+        String uniqueId = player.getUniqueId().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+        String lastLoginDateStr = (String) playerDataMap.get(uniqueId + ".lastLoginDate");
+        if (lastLoginDateStr != null && !lastLoginDateStr.isEmpty()) {
+            try {
+                Date lastLoginDate = sdf.parse(lastLoginDateStr);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(lastLoginDate);
+                calendar.add(Calendar.DAY_OF_YEAR, 1);
+                Date nextExpectedLoginDate = calendar.getTime();
+                Date currentDate = sdf.parse(today);
+                if (currentDate.equals(nextExpectedLoginDate)) {
+                    int daysLoggedIn = (Integer) playerDataMap.getOrDefault(uniqueId + ".daysLoggedIn", 1);
+                    playerDataMap.put(uniqueId + ".daysLoggedIn", daysLoggedIn + 1);
+                } else if (currentDate.after(nextExpectedLoginDate)) {
+                    playerDataMap.put(uniqueId + ".daysLoggedIn", 1); // 1にリセット
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        updateLastLoginDate(player); // 最後にログインした日をアップデート。
+    }
+
+
 
 }
 
