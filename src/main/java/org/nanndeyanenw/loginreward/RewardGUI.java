@@ -36,7 +36,8 @@ public class RewardGUI implements Listener {
 
     public RewardGUI(LoginReward plugin, DataUtil dataUtil) {
         this.plugin = plugin;
-        this.playerDataHandler = new PlayerDataHandler(dataUtil); // ここを追加
+        File dataFolder = plugin.getDataFolder();  // この行を追加
+        this.playerDataHandler = new PlayerDataHandler(dataFolder, "config.yml"); // 引数を修正
         this.playerDataMap = new HashMap<>();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();

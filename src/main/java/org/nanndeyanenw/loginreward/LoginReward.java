@@ -116,7 +116,6 @@ public class LoginReward extends JavaPlugin implements Listener {
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
         if (rewardManager == null) {
-            getLogger().severe("エラー：rewardManagerがnullです！");
             return;
         }
         Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");

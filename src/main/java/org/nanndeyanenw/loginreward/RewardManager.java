@@ -7,7 +7,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class RewardManager {
-    private Connection connection;
+
     private DataUtil dataUtil;
     private Map<UUID, Double> playerMoney = new HashMap<>();
 
