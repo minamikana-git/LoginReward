@@ -40,7 +40,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         saveDefaultConfig();  // config.ymlが存在しない場合、デフォルトをコピー
         this.rewardManager = RewardManager.getInstance(this);
         playerDataHandler = new PlayerDataHandler(getDataFolder(), "player_data.yml");
-
+        DataUtil dataUtilInstance = new DataUtil(this);
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
@@ -48,9 +48,9 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
-        }
+            this.rewardGUI = new RewardGUI(this, dataUtilInstance);
+       }
     }
-
     public PlayerDataHandler getPlayerDataHandler() {
         return playerDataHandler;
     }
@@ -152,8 +152,8 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI() {
         return this.rewardGUI;
     }
-
-
 }
+
+
 
 
