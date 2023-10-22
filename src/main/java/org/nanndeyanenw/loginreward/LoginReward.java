@@ -46,11 +46,12 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
-
+        } else {
             this.rewardGUI = new RewardGUI(this, dataUtilInstance);
+        }
 
        }
-    }
+
     public PlayerDataHandler getPlayerDataHandler() {
         return playerDataHandler;
     }

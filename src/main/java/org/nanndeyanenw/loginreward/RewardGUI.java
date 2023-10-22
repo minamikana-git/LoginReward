@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -29,22 +30,18 @@ public class RewardGUI implements Listener {
     private int daysLoggedIn;
     private Map<String, Object> playerDataMap;
 
-
-
-
-
-
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
 
     public RewardGUI(LoginReward plugin, DataUtil dataUtil) {
-
         this.plugin = plugin;
+        this.playerDataMap = new HashMap<>(); // これを追加
 
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
         }
-    }
+        }
+
 
     public void loadPlayerData(Player player) {
         FileConfiguration config = playerDataHandler.getConfig();
@@ -54,19 +51,16 @@ public class RewardGUI implements Listener {
             config.set(pathBase + ".daysLoggedIn", 1);
             playerDataHandler.saveConfig();
         }
-    }
 
-
-
-    public int getDaysLoggedIn(Player player) {
-        FileConfiguration config = playerDataHandler.getConfig();
-        String path = player.getUniqueId().toString() + ".daysLoggedIn";
-        return config.getInt(path, 1); // デフォルトは1日目
+        // playerDataMapへのロード
+        playerDataMap.put(pathBase + ".lastReceived", config.getString(pathBase + ".lastReceived"));
+        playerDataMap.put(pathBase + ".daysLoggedIn", config.getInt(pathBase + ".daysLoggedIn"));
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        loadPlayerData(player);
         if (!hasReceivedRewardToday(player)) {
             open(player);
             // ログイン日数をインクリメント
@@ -77,8 +71,17 @@ public class RewardGUI implements Listener {
     }
 
 
+    public int getDaysLoggedIn(Player player) {
+        FileConfiguration config = playerDataHandler.getConfig();
+        String path = player.getUniqueId().toString() + ".daysLoggedIn";
+        return config.getInt(path, 1); // デフォルトは1日目
+    }
 
-        @EventHandler
+
+
+
+
+        @EventHandler(priority = EventPriority.HIGHEST)
         public void onInventoryClick (InventoryClickEvent event) throws ParseException {
             if (event.getClickedInventory() != null && event.getView().getTitle().equals("ログインボーナス")) {
                 event.setCancelled(true); // インベントリ内の移動をキャンセル
@@ -166,8 +169,8 @@ public class RewardGUI implements Listener {
         }
 
         cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
-        config.set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
-        config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
+        playerDataMap.put(pathBase + ".lastReceived", sdf.format(cal.getTime()));
+        playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
         playerDataHandler.saveConfig();
 
         // GUIを再度開くことで、更新を反映させる
@@ -181,6 +184,7 @@ public class RewardGUI implements Listener {
 
         private Inventory createGuiInventory (Player player){
             Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス");
+            System.out.println("playerDataMap: " + playerDataMap);
             daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1);
             Bukkit.getLogger().info("Player " + player.getName() + " has logged in for " + daysLoggedIn + " days.");
 
