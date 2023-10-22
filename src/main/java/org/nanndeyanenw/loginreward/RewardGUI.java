@@ -67,7 +67,7 @@ public class RewardGUI implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event){
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (!hasReceivedRewardToday(player)) {
             open(player);
@@ -76,7 +76,8 @@ public class RewardGUI implements Listener {
             // ymlに変更があったので保存
             playerDataHandler.saveConfig();
         }
-        }
+    }
+
 
 
         @EventHandler
