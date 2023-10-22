@@ -25,6 +25,7 @@ import java.util.*;
 public class LoginReward extends JavaPlugin implements Listener {
 
 
+    public DataUtil getDataUtil;
     private PlayerDataHandler playerDataHandler;
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
@@ -48,7 +49,9 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
+            this.getLogger().info("Initializing RewardGUI...");
             this.rewardGUI = new RewardGUI(this, dataUtilInstance);
+            this.getLogger().info("RewardGUI initialized.");
        }
     }
     public PlayerDataHandler getPlayerDataHandler() {
@@ -152,7 +155,9 @@ public class LoginReward extends JavaPlugin implements Listener {
     public RewardGUI getRewardGUI() {
         return this.rewardGUI;
     }
+
 }
+
 
 
 

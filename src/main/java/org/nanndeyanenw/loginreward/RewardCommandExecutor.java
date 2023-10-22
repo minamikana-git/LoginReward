@@ -11,8 +11,10 @@ import java.util.Date;
 public class RewardCommandExecutor implements CommandExecutor {
 
     private final RewardManager rewardManager;
-    private final LoginReward plugin;
+    private LoginReward plugin = new LoginReward();
     private final PlayerDataHandler playerDataHandler;
+
+    DataUtil dataUtilInstance = plugin.getDataUtil;
 
     public RewardCommandExecutor(LoginReward plugin) {
         this.plugin = plugin;
@@ -23,25 +25,31 @@ public class RewardCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            return false;
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (!rewardManager.hasClaimedReward(player)) {
+                // GUIを表示
+                new RewardGUI(plugin, dataUtilInstance).open(player);
+            } else {
+                player.sendMessage("You have already claimed your reward today!");
+            }
         }
 
-        Player player = (Player) sender;
+             Player player = (Player) sender;
 
-        if (cmd.getName().equalsIgnoreCase("debugdate")) {
-            player.sendMessage("§a時刻をアップデートしました。");
+            if (cmd.getName().equalsIgnoreCase("debugdate")) {
+                player.sendMessage("§a時刻をアップデートしました。");
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String today = sdf.format(new Date());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String today = sdf.format(new Date());
 
-            // ymlから最後に受け取った日付を取得
-            String lastReceived = playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
+                // ymlから最後に受け取った日付を取得
+                String lastReceived = playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
 
-            player.sendMessage("今日の日付: " + today);
-            player.sendMessage("最後に受け取った日付: " + lastReceived);
-            return true;
-        }
+                player.sendMessage("今日の日付: " + today);
+                player.sendMessage("最後に受け取った日付: " + lastReceived);
+                return true;
+            }
 
         if (!rewardManager.hasClaimedReward(player)) {
             // GUIを表示
@@ -51,5 +59,8 @@ public class RewardCommandExecutor implements CommandExecutor {
         }
 
         return true;
+
+
     }
 }
+
