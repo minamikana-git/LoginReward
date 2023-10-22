@@ -4,6 +4,7 @@ package org.nanndeyanenw.loginreward;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,9 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RewardGUI implements Listener {
-    private SaveData saveData;
+
+    private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
-    private Database databaseInstance = new Database("player_data.yml");
+     this.playerDataHandler = new PlayerDataHandler(plugin.getDataFolder(), "player_data.yml");
+}
     private Map<String, Object> playerDataMap;
 
 
@@ -48,65 +51,20 @@ public class RewardGUI implements Listener {
     }
 
     public void loadPlayerData(Player player) {
-        this.playerDataMap = databaseInstance.getPlayerData(player.getUniqueId());
-        if (this.playerDataMap == null) {
-            this.playerDataMap = new HashMap<>();
-            this.playerDataMap.put(player.getUniqueId().toString() + ".lastReceived", "");
-            this.playerDataMap.put(player.getUniqueId().toString() + ".daysLoggedIn", 1);
+        FileConfiguration config = playerDataHandler.getConfig();
+        String pathBase = player.getUniqueId().toString();
+        if (!config.contains(pathBase + ".lastReceived")) {
+            config.set(pathBase + ".lastReceived", "");
+            config.set(pathBase + ".daysLoggedIn", 1);
+            playerDataHandler.saveConfig();
         }
     }
 
 
-    private void connect() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                return;
-            }
 
-            synchronized (this) {
-                if (connection != null && !connection.isClosed()) {
-                    return;
-                }
-
-                Class.forName("org.sqlite.JDBC");
-                connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder() + File.separator + "player_data.yml");
-
-                // 必要なテーブルを初期化（存在しない場合）
-                Statement statement = connection.createStatement();
-                String sql = "CREATE TABLE IF NOT EXISTS player_data (uuid STRING, lastReceived STRING, daysLoggedIn INT)";
-                statement.execute(sql);
-                statement.close();
-            }
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void closeConnection() {
-            try {
-                if (connection != null && !connection.isClosed()) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-    }
     public int getDaysLoggedIn(Player player) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("SELECT daysLoggedIn FROM player_data WHERE uuid = ?");
-            ps.setString(1, player.getUniqueId().toString());
-            ResultSet resultSet = ps.executeQuery();
-
-            if (resultSet.next()) {
-                return resultSet.getInt("daysLoggedIn");
-            } else {
-                // デフォルト値
-                return 1;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 1; // エラー時のデフォルト値
-        }
+        String path = player.getUniqueId().toString() + ".daysLoggedIn";
+        return playerDataHandler.getConfig().getInt(path, 1);
     }
 
         @EventHandler
@@ -115,7 +73,7 @@ public class RewardGUI implements Listener {
             if (!hasReceivedRewardToday(player)) {
                 open(player);
                 // ログイン日数をインクリメント
-                saveData.incrementLoginDays(player);
+                dataUtil.incrementLoginDays(player);
                 // dataConfigに変更があったので保存
                 saveData.saveData();
             }
@@ -211,29 +169,10 @@ public class RewardGUI implements Listener {
         cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
 
 
-        try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE player_data SET daysLoggedIn = ? WHERE uuid = ?");
-            ps.setInt(1, daysLoggedIn);
-            ps.setString(2, player.getUniqueId().toString());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
-        try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE player_data SET lastReceived = ? WHERE uuid = ?");
-            ps.setString(1, sdf.format(cal.getTime()));
-            ps.setString(2, player.getUniqueId().toString());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // 既存のコードを継続
-        playerDataMap.put(player.getUniqueId().toString() + ".lastReceived", sdf.format(cal.getTime()));
-        // 今日の日付を文字列として記録
-        playerDataMap.put(player.getUniqueId().toString() + ".daysLoggedIn", daysLoggedIn);
+        String pathBase = player.getUniqueId().toString();
+        playerDataHandler.getConfig().set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
+        playerDataHandler.getConfig().set(pathBase + ".daysLoggedIn", daysLoggedIn);
+        playerDataHandler.saveConfig();
 
 
         // GUIを再度開くことで、更新を反映させる

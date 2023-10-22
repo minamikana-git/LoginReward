@@ -25,7 +25,7 @@ import java.sql.Connection;
 public class LoginReward extends JavaPlugin implements Listener {
 
 
-    private Database database;
+
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
     private Connection connection;
@@ -36,24 +36,11 @@ public class LoginReward extends JavaPlugin implements Listener {
         instance = this;
     }
 
-    private void initializeTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS player_data ("
-                + "uuid TEXT PRIMARY KEY,"
-                + "days INTEGER,"
-                + "lastLoginDate TEXT"
-                + ");";
-        try (Connection conn = database.connect();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void onEnable(String dbFilename) {
+
+    public void onEnable() {
         this.rewardManager =RewardManager.getInstance(this);
-        this.database = new Database(dbFilename);
-        initializeTable();
+
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
@@ -61,18 +48,8 @@ public class LoginReward extends JavaPlugin implements Listener {
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
             getServer().getPluginManager().disablePlugin(this);
-        } else {
-            try {
-                Class.forName("org.sqlite.JDBC"); // SQLite JDBC ドライバをロード
-                connection = DriverManager.getConnection("jdbc:sqlite:" + this.getDataFolder() + File.separator + "player_data.yml");
-            } catch (SQLException e) {
-                e.printStackTrace();
-                getLogger().severe("データベースへの接続に失敗しました。");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                getLogger().severe("SQLite JDBC ドライバが見つかりませんでした。");
+
             }
-        }
     }
 
 
@@ -92,51 +69,24 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     private int getLoginDays(UUID uuid) {
-        String sql = "SELECT days FROM player_data WHERE uuid = ?";
-        try (Connection conn = database.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, uuid.toString());
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("days");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+
     }
 
     private void savePlayerData(UUID uuid, int days, String lastLoginDate) {
-        String sql = "INSERT OR REPLACE INTO player_data(uuid, days, lastLoginDate) VALUES (?, ?, ?)";
-        try (Connection conn = database.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, uuid.toString());
-            pstmt.setInt(2, days);
-            pstmt.setString(3, lastLoginDate);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+
         }
-    }
+
 
 
     @Override
     public void onDisable() {
         instance = null;
         if (rewardManager != null) {
-            closeConnection();
+
         }
     }
 
-    public void closeConnection() {
-        try {
-            if (connection != null && !connection.isClosed()) {
-                connection.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
@@ -195,9 +145,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         return this.rewardGUI;
     }
 
-    public Database getDatabase() {
-        return this.database;
-    }
+
 }
 
 
