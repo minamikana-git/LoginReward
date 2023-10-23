@@ -23,11 +23,11 @@ import java.util.UUID;
 import java.util.*;
 
 public class LoginReward extends JavaPlugin implements Listener {
-
+    private PlayerDataHandler playerDataHandler;
     private DataUtil dataUtilInstance;
 
     public DataUtil getDataUtil;
-    private PlayerDataHandler playerDataHandler;
+
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
     public RewardManager rewardManager;
@@ -37,13 +37,13 @@ public class LoginReward extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();// config.ymlが存在しない場合、デフォルトをコピー
         dataUtilInstance = new DataUtil(this);
+        instance = this;
         getServer().getPluginManager().registerEvents(new RewardGUI(this, dataUtilInstance), this);
         getCommand("setdebugdate").setExecutor(new RewardCommandExecutor(this));
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
-        getCommand("debugdate").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
         playerDataHandler = new PlayerDataHandler(getDataFolder(), "config.yml");
-        DataUtil dataUtilInstance = new DataUtil(this);
+
 
         if (rewardManager == null) {
             getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");

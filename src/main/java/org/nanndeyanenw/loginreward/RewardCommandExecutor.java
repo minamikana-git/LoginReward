@@ -16,6 +16,8 @@ public class RewardCommandExecutor implements CommandExecutor {
     private final PlayerDataHandler playerDataHandler;
     private Date debugDate = null;
     private final LoginReward plugin;
+
+
     private final DataUtil dataUtilInstance;
 
     public RewardCommandExecutor(LoginReward plugin) {
@@ -51,46 +53,22 @@ public class RewardCommandExecutor implements CommandExecutor {
             try {
                 debugDate = sdf.parse(args[0]);
                 sender.sendMessage("日付をセットしました: " + args[0]);
+
             } catch (ParseException e) {
                 sender.sendMessage("間違った使い方です. 使い方 yyyy-MM-dd。");
             }
             return true;
         }
-
-        if (cmd.getName().equalsIgnoreCase("debugdate")) {
-            if (!player.hasPermission("loginreward.debugdate")) {
-                player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
-                return true;
-            }
-            player.sendMessage("§a時刻をアップデートしました。");
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String today = sdf.format(new Date());
-
-            // ymlから最後に受け取った日付を取得
-
-            String lastReceived = playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
-
-            player.sendMessage("今日の日付: " + today);
-            player.sendMessage("最後に受け取った日付: " + lastReceived);
-            return true;
-        } else if (!rewardManager.hasClaimedReward(player)) {
-            // GUIを表示
-            plugin.getRewardGUI().open(player);
-        } else {
-            player.sendMessage("今日の報酬はすでに受け取っています。");
-        }
-
-        return true;
-    }
-
-    private Date getCurrentDate() {
-        if (debugDate != null) {
-            return debugDate;
-        }
-        return new Date();
+        return false;
     }
 }
+
+
+
+
+
+
+
 
 
 

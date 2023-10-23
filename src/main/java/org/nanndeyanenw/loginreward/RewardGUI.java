@@ -211,7 +211,7 @@ public class RewardGUI implements Listener {
 
         private Inventory createGuiInventory (Player player){
             Inventory inv = Bukkit.createInventory(null, 9, "ログインボーナス");
-            System.out.println("playerDataMap: " + playerDataMap);
+            plugin.getLogger().info("playerDataMap: " + playerDataMap);
             daysLoggedIn = (Integer) playerDataMap.getOrDefault(player.getUniqueId().toString() + ".daysLoggedIn", 1);
             Bukkit.getLogger().info("Player " + player.getName() + " has logged in for " + daysLoggedIn + " days.");
 

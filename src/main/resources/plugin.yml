@@ -9,20 +9,12 @@ commands:
   loginreward:
     description: "ログインボーナスのコマンド"
     usage: "/loginreward"
-  debugdate:
-    description: "デバッグ:日付アップデートコマンド"
-    usage: "/debugdate"
-    permission: "loginreward.debugdate"
-    default: op
   setdebugdate:
     description: "デバッグ:強制的に日付を変更するコマンド"
     usage: "/setdebugdate"
     permission: "loginreward.setdebugdate"
     default: op
 permissions:
-  loginreward.debugdate:
-    description: "デバッグ:日付アップデートコマンドを実行する権限"
-    default: op
   loginreward.setdebugdate:
     description: "デバッグ:強制的に日付を変更するコマンドを実行する権限"
     default: op

@@ -100,7 +100,6 @@ public class RewardManager {
 
     public static RewardManager getInstance(LoginReward plugin) {
         if (instance == null) {
-            System.out.println("[DEBUG] Creating new instance of RewardManager...");
             instance = new RewardManager(plugin);
         }
         return instance;
@@ -175,5 +174,6 @@ public class RewardManager {
         // ファイルに保存
         saveYAML();
     }
+
 
 }
