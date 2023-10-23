@@ -24,10 +24,13 @@ public class LoginReward extends JavaPlugin implements Listener {
 
     public DataUtil getDataUtil;
 
+    public Map<String, Object> playerDataMap = new HashMap<>();
+
     private RewardGUI rewardGUI;
     private Map<UUID, Double> playerMoney = new HashMap<>();
     public RewardManager rewardManager;
     private static LoginReward instance;
+    private RewardGUI plugin;
 
     @Override
     public void onEnable() {
@@ -68,7 +71,26 @@ public class LoginReward extends JavaPlugin implements Listener {
         String formattedDate = dateFormat.format(date);
 
         savePlayerData(uuid, updatedDays, formattedDate);
+        }
+
+
+
+    public String getLastLoginDate(UUID uuid) {
+        String uniqueId = uuid.toString();
+        String path = uniqueId + ".lastLoginDate";
+
+        // playerDataMapから最後のログイン日を取得
+        String lastLoginDate = (String) playerDataMap.get(path);
+
+        if (lastLoginDate != null && !lastLoginDate.isEmpty()) {
+            return lastLoginDate;
+        }
+
+        // playerDataMapに情報がない場合はnullを返す
+        return null;
+
     }
+
 
     private int getLoginDays(UUID uuid) {
         FileConfiguration config = getConfig();
@@ -147,6 +169,7 @@ public class LoginReward extends JavaPlugin implements Listener {
     }
 
     public RewardGUI getRewardGUI() {
+
         return this.rewardGUI;
     }
 

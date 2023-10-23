@@ -16,19 +16,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
-import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RewardGUI implements Listener {
 
     private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
-    private Map<String, Object> playerDataMap;
+    public Map<String, Object> playerDataMap;
 
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
@@ -76,6 +73,7 @@ public class RewardGUI implements Listener {
             playerDataHandler.saveConfig();
         }
     }
+
 
 
     public int getDaysLoggedIn(Player player) {
@@ -181,22 +179,38 @@ public class RewardGUI implements Listener {
         player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+        String today = sdf.format(new Date());
+
+        playerDataMap.put(pathBase + ".lastReceived", today);
+        config.set(pathBase + ".lastReceived", today);
+
+        playerDataHandler.saveConfig();
+
         String lastReceivedDateStr = config.getString(pathBase + ".lastReceived");
         Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
 
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Date yesterday = cal.getTime();
-        if (lastReceivedDate.before(yesterday)) {
-            daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
+        System.out.println("Yesterday's Date: " + sdf.format(yesterday));
+
+        Date date= cal.getTime();
+        System.out.println("Today's Date: " + sdf.format(today));
+        // lastReceivedの日付が「今日」でない場合のみカウントを増加
+        System.out.println("Last Received Date: " + sdf.format(lastReceivedDate));
+
+        if (!sdf.format(lastReceivedDate).equals(sdf.format(today))) {
+            if (lastReceivedDate.before(today)) {
+                daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
+                System.out.println("Incrementing daysLoggedIn. New value: " + daysLoggedIn);
+            }
+        } else {
+            System.out.println("No increment for daysLoggedIn.");
         }
-        cal.add(Calendar.DAY_OF_MONTH, 1); // カレンダーを今日の日付に戻す
 
-        playerDataMap.put(pathBase + ".lastReceived", sdf.format(cal.getTime()));
-        playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
-
-        config.set(pathBase + ".lastReceived", sdf.format(cal.getTime()));
-        config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
+        playerDataMap.put(pathBase + ".lastReceived", sdf.format(today));
+        config.set(pathBase + ".lastReceived", sdf.format(today));
 
         playerDataHandler.saveConfig();
 
@@ -242,10 +256,11 @@ public class RewardGUI implements Listener {
         }
 
 
-    public void incrementLoginDays(Player player) {
+    public int incrementLoginDays(Player player) {
         String path = player.getUniqueId().toString() + ".daysLoggedIn";
         int currentDays = playerDataHandler.getConfig().getInt(path, 1);
         playerDataHandler.getConfig().set(path, currentDays + 1);
+        return currentDays;
     }
 
     private void updateLastLoginDate(Player player){
@@ -280,6 +295,7 @@ public class RewardGUI implements Listener {
         }
         updateLastLoginDate(player); // 最後にログインした日をアップデート。
     }
+
 
 }
 
