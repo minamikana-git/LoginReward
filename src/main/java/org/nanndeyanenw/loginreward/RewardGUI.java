@@ -47,7 +47,7 @@ public class RewardGUI implements Listener {
         FileConfiguration config = playerDataHandler.getConfig();
         String pathBase = player.getUniqueId().toString();
         if (!config.contains(pathBase)) {
-            config.set(pathBase + ".lastReceived", "");
+            config.set(pathBase + ".lastReceived", "today");
             config.set(pathBase + ".daysLoggedIn", 1);
             playerDataHandler.saveConfig();
 
@@ -65,15 +65,31 @@ public class RewardGUI implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         loadPlayerData(player);
+
+        // 現在のログイン日数を取得
+        int currentDaysLoggedIn = getDaysLoggedIn(player);
+
+        // 最後にログインした日付をチェックして、それが今日でなければインクリメント
+        if (!hasLoggedToday(player)) {
+            incrementLoginDays(player);
+            updateLastLoginDate(player);
+        }
+
         if (!hasReceivedRewardToday(player)) {
             open(player);
-            // ログイン日数をインクリメント
-            incrementLoginDays(player);
-            // ymlに変更があったら保存
-            playerDataHandler.saveConfig();
         }
     }
 
+    private boolean hasLoggedToday(Player player) {
+        String uniqueId = player.getUniqueId().toString();
+        String pathBase = uniqueId + ".lastLoginDate";
+
+        String lastLogin = (String) playerDataMap.get(pathBase);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+
+        return today.equals(lastLogin);
+    }
 
 
     public int getDaysLoggedIn(Player player) {
@@ -82,12 +98,24 @@ public class RewardGUI implements Listener {
         return config.getInt(path, 1); // デフォルトは1日目
     }
 
+    public int incrementLoginDays(Player player) {
+        String uniqueId = player.getUniqueId().toString();
+        String path = uniqueId + ".daysLoggedIn";
+        int currentDays = (Integer) playerDataMap.getOrDefault(path, 1);
+        playerDataMap.put(path, currentDays + 1); // playerDataMapを更新
+        playerDataHandler.getConfig().set(path, currentDays + 1); // ymlファイルを更新
+        return currentDays + 1;
+    }
 
-
-
-
-        @EventHandler(priority = EventPriority.HIGHEST)
-        public void onInventoryClick (InventoryClickEvent event) throws ParseException {
+    private void updateLastLoginDate(Player player) {
+        String uniqueId = player.getUniqueId().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String today = sdf.format(new Date());
+        playerDataMap.put(uniqueId + ".lastLoginDate", today); // playerDataMapを更新
+        playerDataHandler.getConfig().set(uniqueId + ".lastLoginDate", today); // ymlファイルを更新
+    }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryClick (InventoryClickEvent event) throws ParseException {
             if (event.getView().getTitle().equals("ログインボーナス")) {
                 event.setCancelled(true);
                 Player player = (Player) event.getWhoClicked();
@@ -245,23 +273,6 @@ public class RewardGUI implements Listener {
             item.setItemMeta(meta);
             return item;
         }
-
-
-    public int incrementLoginDays(Player player) {
-        String path = player.getUniqueId().toString() + ".daysLoggedIn";
-        int currentDays = playerDataHandler.getConfig().getInt(path, 1);
-        playerDataHandler.getConfig().set(path, currentDays + 1);
-        return currentDays;
-    }
-
-    private void updateLastLoginDate(Player player){
-        String uniqueId = player.getUniqueId().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String today = sdf.format(new Date());
-        playerDataMap.put(uniqueId + ".lastLoginDate", today);
-    }
-
-
 
 }
 

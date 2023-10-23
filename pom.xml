@@ -6,16 +6,13 @@
 
     <groupId>org.nanndeyanenw</groupId>
     <artifactId>LoginReward</artifactId>
-    <version>2.0</version>
+    <version>2.2</version>
     <packaging>jar</packaging>
-
     <name>LoginReward</name>
-
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
     <build>
         <plugins>
             <plugin>
