@@ -25,7 +25,7 @@ public class RewardGUI implements Listener {
 
     private PlayerDataHandler playerDataHandler;
     private int daysLoggedIn;
-    public Map<String, Object> playerDataMap;
+    public Map<String, Object> playerDataMap; //
 
     private LoginReward plugin;
     private Economy econ; // VaultAPIのEconomy
@@ -170,56 +170,49 @@ public class RewardGUI implements Listener {
         }
 
 
-    private void handleRewardForPlayer(Player player) throws ParseException {
+    public void handleRewardForPlayer(Player player) throws ParseException {
         FileConfiguration config = playerDataHandler.getConfig();
         String pathBase = player.getUniqueId().toString();
-
-        daysLoggedIn = config.getInt(pathBase + ".daysLoggedIn", 1); // デフォルトは1日目
-        double rewardAmount = giveReward(player);
-        player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         String today = sdf.format(new Date());
 
-        playerDataMap.put(pathBase + ".lastReceived", today);
-        config.set(pathBase + ".lastReceived", today);
+        String lastReceivedDateStr = playerDataMap.get(pathBase + ".lastReceived").toString();
+        Date lastReceivedDate = (lastReceivedDateStr.isEmpty()) ? null : sdf.parse(lastReceivedDateStr);
 
-        playerDataHandler.saveConfig();
+        if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
+            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
 
-        String lastReceivedDateStr = config.getString(pathBase + ".lastReceived");
-        Date lastReceivedDate = sdf.parse(lastReceivedDateStr);
+            if (lastReceivedDate != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.DAY_OF_MONTH, -1);
+                Date yesterday = cal.getTime();
 
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        Date yesterday = cal.getTime();
-        System.out.println("Yesterday's Date: " + sdf.format(yesterday));
-
-        Date date= cal.getTime();
-        System.out.println("Today's Date: " + sdf.format(today));
-        // lastReceivedの日付が「今日」でない場合のみカウントを増加
-        System.out.println("Last Received Date: " + sdf.format(lastReceivedDate));
-
-        if (!sdf.format(lastReceivedDate).equals(sdf.format(today))) {
-            if (lastReceivedDate.before(today)) {
-                daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1; // 7日目を超えたらリセット
-                System.out.println("Incrementing daysLoggedIn. New value: " + daysLoggedIn);
+                if (sdf.format(lastReceivedDate).equals(sdf.format(yesterday))) {
+                    daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1;
+                } else {
+                    daysLoggedIn = 1; // ログインボーナスの途絶
+                }
             }
-        } else {
-            System.out.println("No increment for daysLoggedIn.");
+
+            double rewardAmount = giveReward(player);
+            player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+
+            playerDataMap.put(pathBase + ".lastReceived", today);
+            playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
+            config.set(pathBase + ".lastReceived", today);
+            config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
+
+            playerDataHandler.saveConfig();
+
+            player.closeInventory();
+            open(player);
         }
-
-        playerDataMap.put(pathBase + ".lastReceived", sdf.format(today));
-        config.set(pathBase + ".lastReceived", sdf.format(today));
-
-        playerDataHandler.saveConfig();
-
-        // GUIを再度開くことで、更新を反映させる
-        player.closeInventory(); // 一度閉じる
-        open(player); // GUIを開く
     }
 
-        public void open (Player player){
+
+    public void open (Player player){
             player.openInventory(createGuiInventory(player));
         }
 
