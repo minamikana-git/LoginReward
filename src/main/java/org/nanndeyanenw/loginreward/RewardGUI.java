@@ -281,7 +281,5 @@ public class RewardGUI implements Listener {
         updateLastLoginDate(player); // 最後にログインした日をアップデート。
     }
 
-
-
 }
 

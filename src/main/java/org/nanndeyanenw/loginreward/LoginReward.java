@@ -10,16 +10,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.*;
 
 public class LoginReward extends JavaPlugin implements Listener {
@@ -116,23 +112,22 @@ public class LoginReward extends JavaPlugin implements Listener {
 
     //ログインボーナスのインベントリを開くメソッド
     private void openLoginRewardInventory(Player player) {
-        if (rewardManager == null) {
-            return;
-        }
-        Inventory inventory = Bukkit.createInventory(null, 9, "ログインボーナス");
-        int day = rewardManager.getConsecutiveDays(player);
+        if (this.rewardManager != null) {
+            Inventory inventory = Bukkit.createInventory((InventoryHolder)null, 9, "ログインボーナス");
+            int day = this.rewardManager.getConsecutiveDays(player);
 
-        for (int i = 1; i <= 7; i++) {
-            if (i < day) { // すでに受け取った報酬の場合
-                continue; // スキップ
+            for(int i = 1; i <= 7; ++i) {
+                if (i >= day) {
+                    Reward reward = this.rewardManager.getRewardForDay(i);
+                    if (reward != null) {
+                        ItemStack stack = this.createItemStack(Material.GOLD_INGOT, "§a" + reward.getMessage(), "§e" + reward.getAmount() + "NANDE!");
+                        inventory.addItem(new ItemStack[]{stack});
+                    }
+                }
             }
-            Reward reward = rewardManager.getRewardForDay(i);
-            if (reward != null) {
-                ItemStack stack = createItemStack(Material.GOLD_INGOT, "§a" + reward.getMessage(), "§e" + reward.getAmount() + "NANDE!");
-                inventory.addItem(stack);
-            }
+
+            player.openInventory(inventory);
         }
-        player.openInventory(inventory);
     }
 
     private ItemStack createItemStack(Material material, String displayName, String lore) {
