@@ -179,25 +179,23 @@ public class RewardGUI implements Listener {
         String today = sdf.format(new Date());
 
         String lastReceivedDateStr = playerDataMap.get(pathBase + ".lastReceived").toString();
-        Date lastReceivedDate = (lastReceivedDateStr.isEmpty()) ? null : sdf.parse(lastReceivedDateStr);
+        Date lastReceivedDate = null;
+        if (!lastReceivedDateStr.isEmpty()) {
+            lastReceivedDate = sdf.parse(lastReceivedDateStr);
+        }
+
+        int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
 
         if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
-            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
-
-            if (lastReceivedDate != null) {
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.DAY_OF_MONTH, -1);
-                Date yesterday = cal.getTime();
-
-                if (sdf.format(lastReceivedDate).equals(sdf.format(yesterday))) {
-                    daysLoggedIn = (daysLoggedIn >= 7) ? 1 : daysLoggedIn + 1;
-                } else {
-                    daysLoggedIn = 1; // ログインボーナスの途絶
-                }
-            }
 
             double rewardAmount = giveReward(player);
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+
+            if (daysLoggedIn >= 7) {
+                daysLoggedIn = 1; // 8日目なので、1日目にリセットします。
+            } else {
+                daysLoggedIn++;
+            }
 
             playerDataMap.put(pathBase + ".lastReceived", today);
             playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
@@ -263,31 +261,6 @@ public class RewardGUI implements Listener {
         playerDataMap.put(uniqueId + ".lastLoginDate", today);
     }
 
-    private void updateConsecutiveLoginDays(Player player){
-        String uniqueId = player.getUniqueId().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String today = sdf.format(new Date());
-        String lastLoginDateStr = (String) playerDataMap.get(uniqueId + ".lastLoginDate");
-        if (lastLoginDateStr != null && !lastLoginDateStr.isEmpty()) {
-            try {
-                Date lastLoginDate = sdf.parse(lastLoginDateStr);
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(lastLoginDate);
-                calendar.add(Calendar.DAY_OF_YEAR, 1);
-                Date nextExpectedLoginDate = calendar.getTime();
-                Date currentDate = sdf.parse(today);
-                if (currentDate.equals(nextExpectedLoginDate)) {
-                    int daysLoggedIn = (Integer) playerDataMap.getOrDefault(uniqueId + ".daysLoggedIn", 1);
-                    playerDataMap.put(uniqueId + ".daysLoggedIn", daysLoggedIn + 1);
-                } else if (currentDate.after(nextExpectedLoginDate)) {
-                    playerDataMap.put(uniqueId + ".daysLoggedIn", 1); // 1にリセット
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-        updateLastLoginDate(player); // 最後にログインした日をアップデート。
-    }
 
 
 }

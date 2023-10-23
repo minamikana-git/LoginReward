@@ -1,4 +1,4 @@
 players:
   <UUID>:
     lastReceived: "today"
-    daysLoggedIn: 0
+    daysLoggedIn: 1
