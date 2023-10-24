@@ -34,7 +34,7 @@ public class RewardGUI implements Listener {
     public RewardGUI(LoginReward plugin, DataUtil dataUtil) {
         this.plugin = plugin;
         File dataFolder = plugin.getDataFolder();  // この行を追加
-        this.playerDataHandler = new PlayerDataHandler(dataFolder, "playerdata.yml"); // 引数を修正
+        this.playerDataHandler = new PlayerDataHandler(dataFolder, "config.yml"); // 引数を修正
         this.playerDataMap = new HashMap<>();
         if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
             econ = plugin.getServer().getServicesManager().getRegistration(Economy.class).getProvider();
@@ -61,20 +61,11 @@ public class RewardGUI implements Listener {
         }
     }
 
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         loadPlayerData(player);
-
-        // 現在のログイン日数を取得
-        int currentDaysLoggedIn = getDaysLoggedIn(player);
-
-        // 最後にログインした日付をチェックして、それが今日でなければインクリメント
-        if (!hasLoggedToday(player)) {
-            incrementLoginDays(player);
-            updateLastLoginDate(player);
-        }
-
         if (!hasReceivedRewardToday(player)) {
             open(player);
         }
@@ -146,19 +137,10 @@ public class RewardGUI implements Listener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
 
-        if (lastReceived == null || lastReceived.isEmpty() || !today.equals(lastReceived)) {
-            // プレイヤーが今日報酬を受け取っていない場合
-            if (lastReceived == null || lastReceived.isEmpty()) {
-                playerDataMap.put(pathBase, today);
-                // 外部にデータを保存
-                playerDataHandler.saveConfig();
-            }
-            return false; // 今日の報酬は受け取っていない
-        }
-        return true; // 今日の報酬は既に受け取っている
-        }
+        return today.equals(lastReceived);
+    }
 
-        private double giveReward (Player player){
+    private double giveReward (Player player){
             String uniqueId = player.getUniqueId().toString();
             int daysLoggedIn = (Integer) playerDataMap.getOrDefault(uniqueId + ".daysLoggedIn", 1); // デフォルトは1日目
 
@@ -212,10 +194,8 @@ public class RewardGUI implements Listener {
             lastReceivedDate = sdf.parse(lastReceivedDateStr);
         }
 
-        int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
-
         if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
-
+            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
             double rewardAmount = giveReward(player);
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 

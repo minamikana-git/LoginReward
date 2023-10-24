@@ -1,0 +1,4 @@
+players:
+  <UUID>:
+    lastReceived: today
+    daysLoggedIn: 1

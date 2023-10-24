@@ -1,0 +1,20 @@
+name: LoginReward
+version: '2.2'
+main: org.nanndeyanenw.loginreward.LoginReward
+api-version: '1.20'
+load: STARTUP
+depend:
+  - "Vault"
+commands:
+  loginreward:
+    description: "ログインボーナスのコマンド"
+    usage: "/loginreward"
+  setdebugdate:
+    description: "デバッグ:強制的に日付を変更するコマンド"
+    usage: "/setdebugdate"
+    permission: "loginreward.setdebugdate"
+    default: op
+permissions:
+  loginreward.setdebugdate:
+    description: "デバッグ:強制的に日付を変更するコマンドを実行する権限"
+    default: op
