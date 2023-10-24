@@ -46,7 +46,7 @@ public class RewardManager {
 
 
     private void setupYAML() {
-        dataFile = new File(plugin.getDataFolder(), "config.yml");
+        dataFile = new File(plugin.getDataFolder(), "playerdata.yml");
         if (!dataFile.exists()) {
             try {
                 dataFile.createNewFile();

@@ -57,21 +57,6 @@ public class RewardCommandExecutor implements CommandExecutor {
                 }
             } else {
                 if (cmd.getName().equalsIgnoreCase("loginreward")) {
-                    if (cmd.getName().equalsIgnoreCase("debugdate")) {
-                        if (!player.hasPermission("loginreward.debugdate")) {
-                            player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
-                            return true;
-                        }
-
-                        player.sendMessage("§a時刻をアップデートしました。");
-                        sdf = new SimpleDateFormat("yyyy-MM-dd");
-                        String today = sdf.format(new Date());
-                        String lastReceived = this.playerDataHandler.getConfig().getString(player.getUniqueId().toString() + ".lastReceived", "未受取");
-                        player.sendMessage("今日の日付: " + today);
-                        player.sendMessage("最後に受け取った日付: " + lastReceived);
-                        return true;
-                    }
-
                     if (!this.rewardManager.hasClaimedReward(player)) {
                         this.plugin.getRewardGUI().open(player);
                     } else {
@@ -83,11 +68,10 @@ public class RewardCommandExecutor implements CommandExecutor {
             }
         }
     }
-
-    private Date getCurrentDate() {
-        return this.debugDate != null ? this.debugDate : new Date();
-    }
 }
+
+
+
 
 
 

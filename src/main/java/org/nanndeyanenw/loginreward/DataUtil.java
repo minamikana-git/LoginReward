@@ -59,7 +59,7 @@ public DataUtil dataUtil;
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdir();
         }
-        file = new File(plugin.getDataFolder(), "config.yml");
+        file = new File(plugin.getDataFolder(), "playerdata.yml");
 
         if (!file.exists()) {
             try {
