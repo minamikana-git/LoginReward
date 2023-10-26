@@ -90,11 +90,9 @@ public class RewardGUI implements Listener {
     }
 
     public int incrementLoginDays(Player player) {
-        String uniqueId = player.getUniqueId().toString();
-        String path = uniqueId + ".daysLoggedIn";
-        int currentDays = (Integer) playerDataMap.getOrDefault(path, 1);
-        playerDataMap.put(path, currentDays + 1); // playerDataMapを更新
-        playerDataHandler.getConfig().set(path, currentDays + 1); // ymlファイルを更新
+        String path = player.getUniqueId().toString() + ".daysLoggedIn";
+        int currentDays = (int) playerDataMap.getOrDefault(path, 1);
+        playerDataMap.put(path, currentDays + 1);
         return currentDays + 1;
     }
 
@@ -106,27 +104,24 @@ public class RewardGUI implements Listener {
         playerDataHandler.getConfig().set(uniqueId + ".lastLoginDate", today); // ymlファイルを更新
     }
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onInventoryClick (InventoryClickEvent event) throws ParseException {
-            if (event.getView().getTitle().equals("ログインボーナス")) {
-                event.setCancelled(true);
-                Player player = (Player) event.getWhoClicked();
-            }
-                if (event.getCurrentItem() != null) {
-                    Material itemType = event.getCurrentItem().getType();
-                    if (itemType == Material.GOLD_INGOT) {
-                        Player player = (Player) event.getWhoClicked();
-                        if (!hasReceivedRewardToday(player)) {
-                            handleRewardForPlayer(player);
-
-                            // ここでバリアブロックに更新します。
-                            event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
-                        } else {
-                            player.closeInventory();
-                            player.sendMessage("今日の報酬はすでに受け取っています。");
-                        }
+    public void onInventoryClick(InventoryClickEvent event) throws ParseException {
+        if (event.getView().getTitle().equals("ログインボーナス")) { // このブレースを追加
+            event.setCancelled(true);
+            if (event.getCurrentItem() != null) {
+                Material itemType = event.getCurrentItem().getType();
+                if (itemType == Material.GOLD_INGOT) {
+                    Player player = (Player) event.getWhoClicked();
+                    if (!hasReceivedRewardToday(player)) {
+                        handleRewardForPlayer(player);
+                        event.getClickedInventory().setItem(event.getSlot(), createItem(Material.BARRIER, "報酬を受け取りました"));
+                    } else {
+                        player.closeInventory();
+                        player.sendMessage("今日の報酬はすでに受け取っています。");
                     }
                 }
             }
+        }
+    }
 
 
     private boolean hasReceivedRewardToday(Player player){
@@ -190,13 +185,15 @@ public class RewardGUI implements Listener {
 
         String lastReceivedDateStr = playerDataMap.get(pathBase + ".lastReceived").toString();
         Date lastReceivedDate = null;
+
+
         if (!lastReceivedDateStr.isEmpty()) {
             lastReceivedDate = sdf.parse(lastReceivedDateStr);
         }
 
         if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
-            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
             double rewardAmount = giveReward(player);
+            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
             if (daysLoggedIn >= 7) {
@@ -210,6 +207,7 @@ public class RewardGUI implements Listener {
             config.set(pathBase + ".lastReceived", today);
             config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
 
+            incrementLoginDays(player);
             playerDataHandler.saveConfig();
 
             player.closeInventory();
