@@ -66,6 +66,7 @@ public class RewardGUI implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         loadPlayerData(player);
+        // ログインボーナスを受け取っていない場合のみopenメソッドを実行
         if (!hasReceivedRewardToday(player)) {
             open(player);
         }
