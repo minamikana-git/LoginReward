@@ -52,13 +52,14 @@ public class RewardGUI implements Listener {
             playerDataHandler.saveConfig();
 
             // playerDataMapへのロード
-            playerDataMap.put(pathBase + ".lastReceived", "");
+            playerDataMap.put(pathBase + ".lastReceived", "today");
             playerDataMap.put(pathBase + ".daysLoggedIn", 1);
         } else {
             // playerDataMapへのロード
             playerDataMap.put(pathBase + ".lastReceived", config.getString(pathBase + ".lastReceived"));
             playerDataMap.put(pathBase + ".daysLoggedIn", config.getInt(pathBase + ".daysLoggedIn"));
         }
+
     }
 
 
@@ -93,7 +94,15 @@ public class RewardGUI implements Listener {
     public int incrementLoginDays(Player player) {
         String path = player.getUniqueId().toString() + ".daysLoggedIn";
         int currentDays = (int) playerDataMap.getOrDefault(path, 1);
+
+        if (currentDays >= 7) {
+            currentDays = 0; // 7日間の後は1日目にリセットするため
+        }
+
         playerDataMap.put(path, currentDays + 1);
+        playerDataHandler.getConfig().set(path, currentDays + 1); // config.ymlにも保存
+        playerDataHandler.saveConfig(); // 変更を保存
+
         return currentDays + 1;
     }
 
@@ -169,8 +178,7 @@ public class RewardGUI implements Listener {
             // プレイヤーに報酬を付与
             econ.depositPlayer(player, rewardAmount);
 
-            // 連続ログイン日数を1日増やし、保存
-            playerDataMap.put(uniqueId + ".daysLoggedIn", daysLoggedIn + 1);
+
 
             return rewardAmount; // 報酬の金額を返す
         }
@@ -195,19 +203,6 @@ public class RewardGUI implements Listener {
             double rewardAmount = giveReward(player);
             int daysLoggedIn = getDaysLoggedIn(player);  // こちらを使用
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
-
-            if (daysLoggedIn >= 7) {
-                daysLoggedIn = 1; // 8日目なので、1日目にリセットします。
-            } else {
-                daysLoggedIn++;
-            }
-
-            playerDataMap.put(pathBase + ".lastReceived", today);
-            config.set(pathBase + ".lastReceived", today);
-            config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
-
-            incrementLoginDays(player);
-            playerDataHandler.saveConfig();
 
             player.closeInventory();
             open(player);
