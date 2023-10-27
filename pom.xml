@@ -6,7 +6,7 @@
 
     <groupId>org.nanndeyanenw</groupId>
     <artifactId>LoginReward</artifactId>
-    <version>2.3b</version>
+    <version>2.4</version>
     <packaging>jar</packaging>
     <name>LoginReward</name>
     <properties>

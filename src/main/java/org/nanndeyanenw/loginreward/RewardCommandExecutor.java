@@ -35,8 +35,8 @@ public class RewardCommandExecutor implements CommandExecutor {
             return true;
         } else {
             SimpleDateFormat sdf;
-            if (cmd.getName().equalsIgnoreCase("setDebugDate")) {
-                if (!player.hasPermission("loginreward.setdebugdate")) {
+            if (cmd.getName().equalsIgnoreCase("setDate")) {
+                if (!player.hasPermission("loginreward.setdate")) {
                     player.sendMessage("§cあなたにはこのコマンドを実行する権限がありません。");
                     return true;
                 } else if (args.length == 0) {

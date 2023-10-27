@@ -38,7 +38,7 @@ public class LoginReward extends JavaPlugin implements Listener {
         dataUtilInstance = new DataUtil(this);
         instance = this;
         getServer().getPluginManager().registerEvents(new RewardGUI(this, dataUtilInstance), this);
-        getCommand("setdebugdate").setExecutor(new RewardCommandExecutor(this));
+        getCommand("setdate").setExecutor(new RewardCommandExecutor(this));
         getCommand("loginreward").setExecutor(new RewardCommandExecutor(this));
         this.rewardManager = RewardManager.getInstance(this);
         playerDataHandler = new PlayerDataHandler(getDataFolder(), "config.yml");
