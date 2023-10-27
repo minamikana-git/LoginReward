@@ -187,14 +187,13 @@ public class RewardGUI implements Listener {
         String lastReceivedDateStr = playerDataMap.get(pathBase + ".lastReceived").toString();
         Date lastReceivedDate = null;
 
-
         if (!lastReceivedDateStr.isEmpty()) {
             lastReceivedDate = sdf.parse(lastReceivedDateStr);
         }
 
         if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
             double rewardAmount = giveReward(player);
-            int daysLoggedIn = Integer.parseInt(playerDataMap.get(pathBase + ".daysLoggedIn").toString());
+            int daysLoggedIn = getDaysLoggedIn(player);  // こちらを使用
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
 
             if (daysLoggedIn >= 7) {
@@ -204,7 +203,6 @@ public class RewardGUI implements Listener {
             }
 
             playerDataMap.put(pathBase + ".lastReceived", today);
-            playerDataMap.put(pathBase + ".daysLoggedIn", daysLoggedIn);
             config.set(pathBase + ".lastReceived", today);
             config.set(pathBase + ".daysLoggedIn", daysLoggedIn);
 
