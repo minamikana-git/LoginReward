@@ -43,30 +43,43 @@ public class RewardGUI implements Listener {
 
 
     public void loadPlayerData(Player player) {
-
         FileConfiguration config = playerDataHandler.getConfig();
         String pathBase = player.getUniqueId().toString();
+
+        // 現在の日付を取得
+        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
         if (!config.contains(pathBase)) {
-            config.set(pathBase + ".lastReceived", "today");
+            config.set(pathBase + ".lastReceived", today);
             config.set(pathBase + ".daysLoggedIn", 1);
-            playerDataHandler.saveConfig();
+
+            // 最後のログイン日を追加
+            config.set(pathBase + ".lastLoginDate", today);
 
             // playerDataMapへのロード
-            playerDataMap.put(pathBase + ".lastReceived", "today");
+            playerDataMap.put(pathBase + ".lastReceived", today);
             playerDataMap.put(pathBase + ".daysLoggedIn", 1);
+            playerDataMap.put(pathBase + ".lastLoginDate", today);
+
+            playerDataHandler.saveConfig();
         } else {
             // playerDataMapへのロード
             playerDataMap.put(pathBase + ".lastReceived", config.getString(pathBase + ".lastReceived"));
             playerDataMap.put(pathBase + ".daysLoggedIn", config.getInt(pathBase + ".daysLoggedIn"));
+            playerDataMap.put(pathBase + ".lastLoginDate", config.getString(pathBase + ".lastLoginDate"));
         }
-
     }
+
 
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         loadPlayerData(player);
+
+        // 最後のログイン日を更新
+        updateLastLoginDate(player);
+
         // ログインボーナスを受け取っていない場合のみopenメソッドを実行
         if (!hasReceivedRewardToday(player)) {
             open(player);
@@ -201,8 +214,13 @@ public class RewardGUI implements Listener {
 
         if (lastReceivedDate == null || !sdf.format(lastReceivedDate).equals(today)) {
             double rewardAmount = giveReward(player);
-            int daysLoggedIn = getDaysLoggedIn(player);  // こちらを使用
+            int daysLoggedIn = getDaysLoggedIn(player);
             player.sendMessage("あなたは" + daysLoggedIn + "日目のログインボーナスを受け取りました。" + rewardAmount + "円を獲得しました！");
+
+            // lastReceived日付を更新
+            playerDataMap.put(pathBase + ".lastReceived", today);
+            config.set(pathBase + ".lastReceived", today);
+            playerDataHandler.saveConfig();
 
             player.closeInventory();
             open(player);
