@@ -10,11 +10,11 @@ commands:
     description: "ログインボーナスのコマンド"
     usage: "/loginreward"
   setdate:
-    description: "デバッグ:強制的に日付を変更するコマンド"
+    description: "強制的に日付を変更するコマンド"
     usage: "/setdate"
     permission: "loginreward.setdate"
     default: op
 permissions:
   loginreward.setdate:
-    description: "デバッグ:強制的に日付を変更するコマンドを実行する権限"
+    description: "強制的に日付を変更するコマンド"
     default: op
