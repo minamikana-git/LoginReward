@@ -1,4 +1,4 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
 public class Reward {
     private final int amount;

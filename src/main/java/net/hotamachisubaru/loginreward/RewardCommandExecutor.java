@@ -1,4 +1,4 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

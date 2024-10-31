@@ -1,9 +1,11 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +67,7 @@ public DataUtil dataUtil;
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().severe("config.ymlを生成できませんでした。");
             }
         }
 
@@ -88,7 +90,7 @@ public DataUtil dataUtil;
         try {
             config.save(file);
         } catch (IOException e) {
-            e.printStackTrace();
+            Bukkit.getLogger().severe("設定ファイルを保存できませんでした。");
         }
     }
 

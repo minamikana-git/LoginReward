@@ -1,4 +1,4 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -45,7 +45,7 @@ public class LoginReward extends JavaPlugin implements Listener {
 
 
         if (rewardManager == null) {
-            getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。プラグインを無効化します。");
+            getLogger().severe("エラー：VaultプラグインまたはEconomyサービスプロバイダが見つかりませんでした。");
             getServer().getPluginManager().disablePlugin(this);
         } else {
             this.rewardGUI = new RewardGUI(this, dataUtilInstance);
@@ -59,7 +59,7 @@ public class LoginReward extends JavaPlugin implements Listener {
 
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void saveData(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 

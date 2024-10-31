@@ -1,6 +1,7 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
 
+import net.hotamachisubaru.loginreward.DataUtil;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

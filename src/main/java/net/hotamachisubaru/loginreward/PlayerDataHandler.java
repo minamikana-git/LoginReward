@@ -1,5 +1,6 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -16,7 +17,7 @@ public class PlayerDataHandler {
                 try {
                     file.createNewFile();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Bukkit.getLogger().severe("ファイルを作成できませんでした。");
                 }
             }
             this.config = YamlConfiguration.loadConfiguration(file);
@@ -27,7 +28,7 @@ public class PlayerDataHandler {
             try {
                 config.save(file);
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().severe("設定ファイルを保存できませんでした。");
             }
         }
 

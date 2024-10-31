@@ -1,10 +1,12 @@
-package org.nanndeyanenw.loginreward;
+package net.hotamachisubaru.loginreward;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -52,7 +54,7 @@ public class RewardManager {
             try {
                 dataFile.createNewFile();
             } catch (IOException e) {
-                e.printStackTrace();
+                Bukkit.getLogger().severe("config.ymlの生成に失敗しました。");
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
