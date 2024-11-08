@@ -1,107 +1,97 @@
-package net.hotamachisubaru.loginreward;
+package net.hotamachisubaru.loginreward
 
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.Bukkit
+import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.entity.Player
+import java.io.File
+import java.io.IOException
 
+class DataUtil(private val plugin: LoginReward) {
+    var dataUtil: DataUtil? = null
 
-import java.io.File;
-import java.io.IOException;
-
-public class DataUtil {
-
-
-    private static FileConfiguration config;
-    private static File file;
-
-    public static void setConfig(FileConfiguration config) {
-        DataUtil.config = config;
+    init {
+        setup()
     }
 
-    public static void setFile(File file) {
-        DataUtil.file = file;
-    }
-
-public DataUtil dataUtil;
-    public static int getDaysLoggedIn(Player player) {
-        return dataConfig.getInt(player.getUniqueId().toString() + ".daysLoggedIn", 0);
-    }
-
-    public static void incrementDaysLoggedIn(Player player) {
-        int currentDays = getDaysLoggedIn(player);
-        dataConfig.set(player.getUniqueId().toString()+".daysLoggedIn",currentDays + 1);
-        try {
-            dataConfig.save(dataFile);
-        }catch (IOException e) {
-            e.printStackTrace();
+    private fun setup() {
+        if (!plugin.dataFolder.exists()) {
+            plugin.dataFolder.mkdir()
         }
-    }
-
-    public static void resetDaysLoggedIn(Player player){
-        dataConfig.set(player.getUniqueId().toString() + ".daysLoggedIn", 0);
-        try {
-            dataConfig.save(dataFile);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-    public static YamlConfiguration dataConfig;
-    public static File dataFile;
-
-    private final LoginReward plugin;
-
-    public DataUtil(LoginReward plugin) {
-        this.plugin = plugin;
-        setup();
-    }
-
-    private void setup() {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdir();
-        }
-        file = new File(plugin.getDataFolder(), "config.yml");
-
-        if (!file.exists()) {
+        file = File(plugin.dataFolder, "config.yml")
+        if (!file!!.exists()) {
             try {
-                file.createNewFile();
-            } catch (IOException e) {
-                Bukkit.getLogger().severe("config.ymlを生成できませんでした。");
+                file!!.createNewFile()
+            } catch (e: IOException) {
+                Bukkit.getLogger().severe("config.ymlを生成できませんでした。")
+            }
+        }
+    }
+
+    operator fun contains(path: String?): Boolean {
+        return config!!.contains(path!!)
+    }
+
+    companion object {
+        private var config: FileConfiguration? = null
+        private var file: File? = null
+        fun setConfig(config: FileConfiguration?) {
+            Companion.config = config
+        }
+
+        fun setFile(file: File?) {
+            Companion.file = file
+        }
+
+        fun getDaysLoggedIn(player: Player): Int {
+            return dataConfig!!.getInt(player.uniqueId.toString() + ".daysLoggedIn", 0)
+        }
+
+        fun incrementDaysLoggedIn(player: Player) {
+            val currentDays = getDaysLoggedIn(player)
+            dataConfig!![player.uniqueId.toString() + ".daysLoggedIn"] = currentDays + 1
+            try {
+                dataConfig!!.save(dataFile!!)
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
 
-    }
+        fun resetDaysLoggedIn(player: Player) {
+            dataConfig!![player.uniqueId.toString() + ".daysLoggedIn"] = 0
+            try {
+                dataConfig!!.save(dataFile!!)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
 
-    public static void set(String path, Object value) {
-        config.set(path, value);
-        save();
-    }
-    public static Object get(String path) {
-        return config.get(path);
-    }
+        var dataConfig: YamlConfiguration? = null
+        var dataFile: File? = null
+        operator fun set(path: String?, value: Any?) {
+            config!![path!!] = value
+            save()
+        }
 
-    public boolean contains(String path) {
+        operator fun get(path: String?): Any {
+            return config!![path!!]!!
+        }
 
-        return config.contains(path);
-    }
+        fun save() {
+            try {
+                config!!.save(file!!)
+            } catch (e: IOException) {
+                Bukkit.getLogger().severe("設定ファイルを保存できませんでした。")
+            }
+        }
 
-    public static void save() {
-        try {
-            config.save(file);
-        } catch (IOException e) {
-            Bukkit.getLogger().severe("設定ファイルを保存できませんでした。");
+        fun getDouble(path: String?): Double {
+            return config!!.getDouble(path!!)
+        }
+
+        fun getConfigurationSection(path: String?): ConfigurationSection {
+            return config!!.getConfigurationSection(path!!)!!
         }
     }
-
-
-
-    public static double getDouble(String path) {
-        return config.getDouble(path);
-    }
-
-    public static ConfigurationSection getConfigurationSection(String path) {
-        return config.getConfigurationSection(path);
-    }
-
 }

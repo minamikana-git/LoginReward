@@ -44,7 +44,7 @@ public class RewardGUI implements Listener {
 
 
     public void loadPlayerData(Player player) {
-        FileConfiguration config = playerDataHandler.getConfig();
+        FileConfiguration config = playerDataHandler.config;
         String pathBase = player.getUniqueId().toString();
 
         // 現在の日付を取得
@@ -100,7 +100,7 @@ public class RewardGUI implements Listener {
 
 
     public int getDaysLoggedIn(Player player) {
-        FileConfiguration config = playerDataHandler.getConfig();
+        FileConfiguration config = playerDataHandler.config;
         String path = player.getUniqueId().toString() + ".daysLoggedIn";
         return config.getInt(path, 1); // デフォルトは1日目
     }
@@ -114,7 +114,7 @@ public class RewardGUI implements Listener {
         }
 
         playerDataMap.put(path, currentDays + 1);
-        playerDataHandler.getConfig().set(path, currentDays + 1); // config.ymlにも保存
+        playerDataHandler.config.set(path, currentDays + 1); // config.ymlにも保存
         playerDataHandler.saveConfig(); // 変更を保存
 
         return currentDays + 1;
@@ -125,7 +125,7 @@ public class RewardGUI implements Listener {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String today = sdf.format(new Date());
         playerDataMap.put(uniqueId + ".lastLoginDate", today); // playerDataMapを更新
-        playerDataHandler.getConfig().set(uniqueId + ".lastLoginDate", today); // ymlファイルを更新
+        playerDataHandler.config.set(uniqueId + ".lastLoginDate", today); // ymlファイルを更新
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) throws ParseException {
@@ -199,7 +199,7 @@ public class RewardGUI implements Listener {
 
 
     public void handleRewardForPlayer(Player player) throws ParseException {
-        FileConfiguration config = playerDataHandler.getConfig();
+        FileConfiguration config = playerDataHandler.config;
         String pathBase = player.getUniqueId().toString();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

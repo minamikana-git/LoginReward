@@ -1,38 +1,33 @@
-package net.hotamachisubaru.loginreward;
+package net.hotamachisubaru.loginreward
 
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.Bukkit
+import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
+import java.io.File
+import java.io.IOException
 
-import java.io.File;
-import java.io.IOException;
+class PlayerDataHandler(dataFolder: File?, fileName: String?) {
+    private val file: File
+    @JvmField
+    val config: FileConfiguration
 
-public class PlayerDataHandler {
-        private File file;
-        private FileConfiguration config;
-
-        public PlayerDataHandler(File dataFolder, String fileName) {
-            this.file = new File(dataFolder, fileName);
-            if (!file.exists()) {
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    Bukkit.getLogger().severe("ファイルを作成できませんでした。");
-                }
-            }
-            this.config = YamlConfiguration.loadConfiguration(file);
-        }
-
-
-    public void saveConfig() {
+    init {
+        file = File(dataFolder, fileName)
+        if (!file.exists()) {
             try {
-                config.save(file);
-            } catch (IOException e) {
-                Bukkit.getLogger().severe("設定ファイルを保存できませんでした。");
+                file.createNewFile()
+            } catch (e: IOException) {
+                Bukkit.getLogger().severe("ファイルを作成できませんでした。")
             }
         }
+        config = YamlConfiguration.loadConfiguration(file)
+    }
 
-        public FileConfiguration getConfig() {
-            return config;
+    fun saveConfig() {
+        try {
+            config.save(file)
+        } catch (e: IOException) {
+            Bukkit.getLogger().severe("設定ファイルを保存できませんでした。")
         }
+    }
 }
